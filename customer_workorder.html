@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>เพิ่มข้อมูลใบสั่งงาน</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --text: #111827;
+      --bg: #f3f4f6;
+      --white: #ffffff;
+      --border: #d1d5db;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Prompt', sans-serif;
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      padding: 35px 40px;
+      border-top: 6px solid var(--primary);
+      box-sizing: border-box;
+    }
+
+    h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    h3 {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 4px;
+      margin-top: 35px;
+      font-size: 18px;
+    }
+
+    label {
+      font-weight: 500;
+      color: var(--text);
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 15px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background-color: #fdfdfd;
+      box-sizing: border-box;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+      outline: none;
+    }
+
+    button {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      width: 100%;
+      transition: all 0.25s ease;
+    }
+
+    button:hover {
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .checks {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .checks li {
+      list-style: none;
+      background: #ffffff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      line-height: 1.5;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checks li:hover {
+      background: #f0f5ff;
+      border-color: var(--primary-light);
+    }
+
+    .checks input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .row {
+      margin-top: 30px;
+    }
+
+    /* ✅ Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 25px 20px;
+        margin: 20px;
+        border-radius: 12px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      h3 {
+        font-size: 16px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      button {
+        font-size: 15px;
+        padding: 10px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 20px;
+      }
+
+      .container {
+        padding: 20px 15px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+
+      .checks li {
+        font-size: 14px;
+        padding: 8px 10px;
+      }
+    }
+
+    .btn-back-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      background: #1e3a8a;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      white-space: nowrap;
+
+      margin-bottom: 15px;
+      transition: 0.2s;
+    }
+
+    .btn-back-top:hover {
+      background: #3b82f6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="customer_dashboard.html" class="btn-back-top">⬅ กลับหน้า Dashboard</a>
+
+    <h1>ฟอร์มออกใบสั่งงาน</h1>
+    <h1>TN MESSENGER SERVICE</h1>
+<form id="jobForm">
+      <h3>ข้อมูลทั่วไป</h3>
+      <label>E-mail
+        <input required name="email" type="email" />
+      </label>
+      <label>โครงการ
+        <select name="project" required>
+          <option value="">--เลือก--</option>
+        </select>
+      </label>
+
+      <label>วันที่เก็บเอกสาร (วัน/เดือน/พ.ศ.)
+        <input required name="collectDate" type="text" id="collectDateInput" placeholder="วันที่เก็บเอกสาร" />
+      </label>
+      <label>(ทีม)
+        <input name="team" required />
+      </label>
+      <label>ผู้สั่งงาน
+        <input name="requester" required />
+      </label>
+      <label>เบอร์โทรศัพท์ผู้สั่งงาน
+        <input name="requesterPhone" required />
+      </label>
+
+      <h3>รายละเอียดลูกค้า</h3>
+      <label>ลูกค้า*
+        <input name="customerName" required />
+      </label>
+      <label>เบอร์โทรศัพท์ลูกค้า*
+        <input name="customerPhone" required />
+      </label>
+
+      <h3>รายละเอียดที่อยู่*</h3>
+      <div class="loading" id="loading"></div> 
+      
+      <label>จังหวัด
+        <select name="province" id="province" required>
+          <option value="">-- เลือกจังหวัด --</option>
+        </select>
+      </label>
+      <label>เขต/อำเภอ
+        <select name="district" id="district" required disabled>
+          <option value="">-- เลือกเขต/อำเภอ --</option>
+        </select>
+      </label>
+      <label>แขวง/ตำบล
+        <select name="subdistrict" id="subdistrict" required disabled>
+          <option value="">-- เลือกแขวง/ตำบล --</option>
+        </select>
+      </label>
+      <label>รหัสไปรษณีย์
+        <input name="zipcode" id="zipcode" required readonly />
+      </label>
+      
+      <label>เลขที่/ถนน/ซอย
+        <input name="addrStreet" required />
+      </label>
+      <h3>เอกสารที่ต้องจัดเก็บ*</h3>
+      <ol class="checks" id="documentsChecklist">
+        </ol>
+
+      <label>หมายเหตุ
+        <textarea name="note" rows="3"></textarea>
+      </label>
+
+      <div class="row">
+        <button type="submit">บันทึก</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    /****************************************************
+     * 1) LOAD DATA FROM GOOGLE SHEET (แยก URL)
+     ****************************************************/
+
+    // 🎯 Element IDs สำหรับ Address 
+    const provinceSelect = document.getElementById("province");
+    const districtSelect = document.getElementById("district");
+    const subdistrictSelect = document.getElementById("subdistrict");
+    const zipcodeInput = document.getElementById("zipcode");
+    const loadingText = document.getElementById("loading"); // ใช้สำหรับแสดงข้อความโหลด
+    const collectDateInput = document.getElementById("collectDateInput"); 
+
+    let thailandData = [];
+
+    // ========== URL ระบบใบสั่งงาน ==========(สำหรับการบันทึกข้อมูล)
+    const SCRIPT_URL_ORDER = "https://script.google.com/macros/s/AKfycbwutGjM8fg__QRCBYBiDsCJ8ttkQ-97v8gER_C_W7VB4TG5-vvX5doUXlbGc5bvZYM5/exec";
+
+    // ========== URL รวมทั้ง Address + Project + Document ==========(สำหรับการดึงข้อมูล)
+    const SCRIPT_URL_DATA = "https://script.google.com/macros/s/AKfycbyq3DjZ8ZulzWSq4yu6vvp4HGvkLaK_WqMjAYiBYb5xWcpaHxsNKoupPa133Nkajj4r0w/exec";
+
+    // โหลดจังหวัด/เขต/แขวงจาก Google Sheet
+    async function loadThailandData() {
+        try {
+            if (loadingText) loadingText.textContent = "กำลังโหลดข้อมูลที่อยู่จาก Google Sheet...";
+
+            const url = `${SCRIPT_URL_DATA}?action=getAddressData`;
+            const res = await fetch(url);
+            thailandData = await res.json();
+
+            const provinces = [...new Set(thailandData.map(i => i.province))].sort();
+
+            if (provinceSelect) {
+                provinceSelect.innerHTML = '<option value="">-- เลือกจังหวัด --</option>';
+                provinces.forEach(p => {
+                    const opt = document.createElement("option");
+                    opt.value = p;
+                    opt.textContent = p;
+                    provinceSelect.appendChild(opt);
+                });
+                provinceSelect.disabled = false;
+            }
+
+            if (loadingText) loadingText.textContent = "";
+        } catch (err) {
+            if (loadingText) loadingText.textContent = "❌ โหลดข้อมูลที่อยู่ไม่สำเร็จ";
+            console.error("❌ โหลดข้อมูลที่อยู่ไม่สำเร็จ", err);
+        }
+    }
+
+
+    /****************************************************
+     * 2) QR CODE IMAGE (ไม่ได้ใช้งานในส่วนนี้ แต่เก็บไว้)
+     ****************************************************/
+    function generateQRCodeImage(text) {
+        return new Promise((resolve) => {
+            const tempDiv = document.createElement('div');
+            tempDiv.style.display = 'none';
+            document.body.appendChild(tempDiv);
+
+            const qr = new QRCode(tempDiv, {
+                text: text,
+                width: 120,
+                height: 120,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            setTimeout(() => {
+                const canvas = tempDiv.querySelector('canvas');
+                const dataURL = canvas.toDataURL('image/png');
+                document.body.removeChild(tempDiv);
+                resolve(dataURL);
+            }, 100);
+        });
+    }
+
+
+    /****************************************************
+     * 3) SAVE ORDER DATA TO GOOGLE SHEET (BACKGROUND)
+     ****************************************************/
+    function saveToSheetsBackground(payload) {
+        const cbName = "gsCb_" + Date.now();
+        const s = document.createElement("script");
+
+        window[cbName] = (res) => {
+            console.log("บันทึกข้อมูลลง Google Sheets:", res);
+            delete window[cbName];
+            document.body.removeChild(s);
+        };
+
+        s.onerror = () => {
+            console.error("❌ ไม่สามารถเชื่อมต่อ Google Sheets");
+            delete window[cbName];
+            document.body.removeChild(s);
+        };
+
+        s.src = `${SCRIPT_URL_ORDER}?callback=${cbName}&data=${encodeURIComponent(JSON.stringify(payload))}`;
+        document.body.appendChild(s);
+    }
+
+
+    /****************************************************
+     * 4) GET NEXT ORDER NUMBER
+     ****************************************************/
+    function getNextOrderNo() {
+        return new Promise((resolve, reject) => {
+            const cbName = "gsGetOrder_" + Date.now();
+            const s = document.createElement("script");
+
+            window[cbName] = (res) => {
+                delete window[cbName];
+                document.body.removeChild(s);
+
+                if (res.result === "success") resolve(res.orderNo);
+                else reject(new Error(res.message || "เกิดข้อผิดพลาด"));
+            };
+
+            s.onerror = () => {
+                delete window[cbName];
+                document.body.removeChild(s);
+                reject(new Error("ไม่สามารถเชื่อมต่อ Google Sheets"));
+            };
+
+            s.src = `${SCRIPT_URL_ORDER}?callback=${cbName}&action=getOrderNo`;
+            document.body.appendChild(s);
+        });
+    }
+
+    /****************************************************
+     * 5) SUBMIT FORM AND SAVE ORDER DATA
+     ****************************************************/
+    document.getElementById("jobForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const f = e.target;
+        const d = Object.fromEntries(new FormData(f).entries());
+        const get = n => (d[n] && String(d[n]).trim() !== "" ? String(d[n]).trim() : "");
+
+        // ตรวจสอบเอกสารที่เลือก
+        const docs = Array.from(f.querySelectorAll('input[name="documents"]:checked'))
+            .map(x => x.value);
+
+        // ตรวจสอบว่ามีการเลือกเอกสารหรือไม่
+        if (docs.length === 0) {
+            alert("กรุณาเลือกเอกสารที่ต้องจัดเก็บอย่างน้อย 1 รายการ");
+            return;
+        }
+
+        const submitBtn = f.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "⏳ กำลังบันทึกข้อมูล...";
+
+        try {
+            /************** ORDER NUMBER + TIME **************/
+            const orderNo = await getNextOrderNo();
+            const orderNoStr = String(orderNo).padStart(4, "0");
+
+            const now = new Date();
+            const yearAD = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            const yearBE = yearAD + 543;
+            const dateTime = `${parseInt(day, 10)}/${parseInt(month, 10)}/${yearBE}, ${hour}:${minute}:${second}`;
+
+            const collectDateISO = collectDateInput ? collectDateInput.getAttribute('data-iso-date') : get("collectDate");
+
+            if (!collectDateISO || collectDateISO.length !== 10) {
+                throw new Error("❌ กรุณาเลือกวันที่เก็บเอกสารให้ถูกต้อง");
+            }
+
+            /************** DATA PACKAGE ****************/
+            const fullData = {
+                orderNo: orderNoStr,
+                dateTime: dateTime, 
+                team: get("team"),
+                requester: get("requester"),
+                requesterPhone: get("requesterPhone"),
+                email: get("email"),
+                project: get("project"),
+                collectDate: collectDateISO, 
+                customerName: get("customerName"),
+                customerPhone: get("customerPhone"),
+                addrStreet: get("addrStreet"), 
+                province: get("province"),
+                district: get("district"),
+                subdistrict: get("subdistrict"),
+                zipcode: get("zipcode"),
+                documents: docs.join(" | "), 
+                note: get("note")
+            };
+
+            /************** SAVE SHEET ****************/
+            saveToSheetsBackground({ action: "insertJob", orderNo, baseURL: window.location.origin, ...fullData });
+
+            alert(`✅ บันทึกข้อมูลสำเร็จ!\nเลขที่ใบสั่งงาน: ${orderNoStr}`);
+            f.reset();
+
+            // รีเซ็ต Date Picker และ Address Select
+            if (collectDateInput) {
+                collectDateInput.value = "";
+                collectDateInput.removeAttribute('data-iso-date');
+            }
+            if (provinceSelect) provinceSelect.selectedIndex = 0;
+            if (districtSelect) {
+                districtSelect.innerHTML = '<option value="">-- เลือกเขต/อำเภอ --</option>';
+                districtSelect.disabled = true;
+            }
+            if (subdistrictSelect) {
+                subdistrictSelect.innerHTML = '<option value="">-- เลือกแขวง/ตำบล --</option>';
+                subdistrictSelect.disabled = true;
+            }
+            if (zipcodeInput) zipcodeInput.value = "";
+
+
+        } catch (err) {
+            alert("❌ ERROR: " + err.message);
+            console.error(err);
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+
+
+    // --- [START] Flatpickr สำหรับ Date Picker (พ.ศ.) ---
+
+    document.addEventListener("DOMContentLoaded", () => {
+        
+        const updateYearBE = (yearInput) => {
+            const yearAD = parseInt(yearInput.value, 10);
+            if (yearAD < 2500) {
+                yearInput.value = yearAD + 543;
+            }
+        };
+        
+        const convertYearDropdownToBE = (instance) => {
+            const yearSelect = instance.calendarContainer.querySelector('.flatpickr-month-dropdown-container select');
+            if (yearSelect && yearSelect.options.length > 0) {
+                if (parseInt(yearSelect.options[0].textContent, 10) < 2500) {
+                    Array.from(yearSelect.options).forEach(option => {
+                        const yearAD = parseInt(option.textContent, 10);
+                        if (yearAD) {
+                            option.textContent = yearAD + 543;
+                        }
+                    });
+                }
+            }
+        }
+
+        if (collectDateInput) {
+            flatpickr(collectDateInput, {
+                locale: "th",
+                dateFormat: "d/m/Y",
+                thai_buddhist: true,
+
+                onReady: function (selectedDates, dateStr, instance) {
+                    const yearInput = instance.calendarContainer.querySelector('.cur-year');
+                    updateYearBE(yearInput);
+
+                    instance.calendarContainer.querySelectorAll('.flatpickr-prev-month, .flatpickr-next-month').forEach(btn => {
+                        btn.addEventListener('click', () => updateYearBE(yearInput));
+                    });
+                    convertYearDropdownToBE(instance);
+                },
+
+                onYearChange: function (selectedDates, dateStr, instance) {
+                    const yearInput = instance.calendarContainer.querySelector('.cur-year');
+                    if (yearInput) {
+                        updateYearBE(yearInput);
+                    } else {
+                        convertYearDropdownToBE(instance);
+                    }
+                },
+
+                onOpen: function (selectedDates, dateStr, instance) {
+                    const currentValue = instance.input.value;
+                    const parts = currentValue.split('/');
+                    if (parts.length === 3) {
+                        const day = parseInt(parts[0], 10);
+                        const month = parseInt(parts[1], 10) - 1;
+                        const yearBE = parseInt(parts[2], 10);
+
+                        if (yearBE > 2500 && !isNaN(day) && !isNaN(month)) {
+                            const yearAD = yearBE - 543;
+                            const dateAD = new Date(yearAD, month, day);
+
+                            if (dateAD.getFullYear() === yearAD && dateAD.getMonth() === month && dateAD.getDate() === day) {
+                                instance.setDate(dateAD, false);
+                            } else {
+                                instance.setDate(null, false);
+                            }
+                        }
+                    }
+                    convertYearDropdownToBE(instance);
+                },
+
+                onClose: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const date = selectedDates[0];
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const yearBE = date.getFullYear() + 543;
+
+                        instance.input.value = `${parseInt(day, 10)}/${parseInt(month, 10)}/${yearBE}`;
+
+                        const yearAD = date.getFullYear();
+                        const dateISO = `${yearAD}-${month}-${day}`;
+                        instance.input.setAttribute('data-iso-date', dateISO);
+                    }
+                }
+            });
+        }
+    });
+    // --- [END] Flatpickr ---
+
+
+    // --- [START] Address Select Events ---
+
+    function populateDistricts(province) {
+        if (!districtSelect || !subdistrictSelect || !zipcodeInput) return;
+
+        districtSelect.innerHTML = '<option value="">-- เลือกเขต/อำเภอ --</option>';
+        subdistrictSelect.innerHTML = '<option value="">-- เลือกแขวง/ตำบล --</option>';
+        subdistrictSelect.disabled = true;
+        zipcodeInput.value = "";
+
+        if (province) {
+            const districts = [...new Set(thailandData.filter(i => i.province === province).map(i => i.district))].sort();
+            districts.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.textContent = d;
+                districtSelect.appendChild(opt);
+            });
+            districtSelect.disabled = false;
+        } else {
+            districtSelect.disabled = true;
+        }
+    }
+
+    function populateSubdistricts(district) {
+        if (!subdistrictSelect || !zipcodeInput) return;
+
+        subdistrictSelect.innerHTML = '<option value="">-- เลือกแขวง/ตำบล --</option>';
+        zipcodeInput.value = "";
+
+        if (district) {
+            const province = provinceSelect.value;
+            const subdistricts = [...new Set(thailandData.filter(i => i.province === province && i.district === district).map(i => i.subdistrict))].sort();
+            
+            subdistricts.forEach(s => {
+                const opt = document.createElement("option");
+                opt.value = s;
+                opt.textContent = s;
+                subdistrictSelect.appendChild(opt);
+            });
+            subdistrictSelect.disabled = false;
+        } else {
+            subdistrictSelect.disabled = true;
+        }
+    }
+
+    function updateZipcode(subdistrict) {
+        if (!zipcodeInput) return;
+
+        zipcodeInput.value = "";
+        if (subdistrict) {
+            const province = provinceSelect.value;
+            const district = districtSelect.value;
+            
+            const item = thailandData.find(i => i.province === province && i.district === district && i.subdistrict === subdistrict);
+            if (item) {
+                zipcodeInput.value = item.zipcode;
+            }
+        }
+    }
+
+    // 🎯 Event listeners สำหรับการเลือกที่อยู่
+    if (provinceSelect) {
+        provinceSelect.addEventListener("change", (e) => {
+            populateDistricts(e.target.value);
+        });
+    }
+
+    if (districtSelect) {
+        districtSelect.addEventListener("change", (e) => {
+            populateSubdistricts(e.target.value);
+        });
+    }
+
+    if (subdistrictSelect) {
+        subdistrictSelect.addEventListener("change", (e) => {
+            updateZipcode(e.target.value);
+        });
+    }
+    // --- [END] Address Select Events ---
+
+
+    /****************************************************
+     * LOAD PROJECT LIST
+     ****************************************************/
+    async function loadProjectList() {
+        try {
+            const res = await fetch(`${SCRIPT_URL_DATA}?action=getProjectList`);
+            const projectList = await res.json();
+
+            const sel = document.querySelector('select[name="project"]');
+            if (!sel) return;
+
+            sel.innerHTML = '<option value="">--เลือก--</option>';
+
+            projectList.forEach(name => {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = name;
+                sel.appendChild(opt);
+            });
+
+        } catch (err) {
+            console.error("❌ โหลดโครงการผิดพลาด", err);
+        }
+    }
+
+
+    /****************************************************
+     * 6) ATTACH CLICK HANDLER TO CHECKLIST ITEMS
+     ****************************************************/
+    function attachDocumentClickListener() {
+        // 🎯 ผูก Event Listener เข้ากับ li ทุกตัวใน #documentsChecklist
+        document.querySelectorAll("#documentsChecklist li").forEach(item => {
+            // ป้องกันการผูกซ้ำซ้อน
+            item.removeEventListener("click", toggleCheckbox); 
+            item.addEventListener("click", toggleCheckbox);
+        });
+    }
+
+    function toggleCheckbox(e) {
+        // ถ้าผู้ใช้คลิกที่ตัว input โดยตรง หรือ label ให้จบการทำงาน
+        if (e.target.tagName.toLowerCase() === "input" || e.target.tagName.toLowerCase() === "label") {
+            return;
+        }
+
+        // หา Checkbox ภายใน li ที่ถูกคลิก (this คือ li)
+        const checkbox = this.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+        }
+    }
+
+
+    /****************************************************
+     * LOAD DOCUMENT CHECKLIST
+     ****************************************************/
+    async function loadDocumentsList() {
+        try {
+            const res = await fetch(`${SCRIPT_URL_DATA}?action=getDocumentsList`);
+            const docList = await res.json();
+
+            // 🎯 ดึง Element ด้วย ID 
+            const container = document.getElementById("documentsChecklist");
+            if (!container) return; 
+
+            container.innerHTML = "";
+
+            docList.forEach(name => {
+                const li = document.createElement("li");
+                li.classList.add("doc-item");
+                
+                li.innerHTML = `
+                    <input type="checkbox" name="documents" value="${name}">
+                    ${name}
+                `;
+
+                container.appendChild(li);
+            });
+            
+            // ✅ เรียกฟังก์ชันผูก Event Listener หลังสร้างรายการเสร็จ
+            attachDocumentClickListener();
+
+        } catch (err) {
+            console.error("❌ โหลดเอกสารไม่สำเร็จ", err);
+        }
+    }
+
+
+    /****************************************************
+     * 7) INITIAL LOAD 
+     ****************************************************/
+    if (provinceSelect) loadThailandData(); // โหลดข้อมูลที่อยู่
+    loadProjectList();
+    loadDocumentsList();
+  </script>
+</body>
+
+</html>

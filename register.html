@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TN Messenger Service - Register</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <script type="module">
+    // นำเข้าโมดูล Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    // 🟢 NEW: นำเข้า getAnalytics ตามคำขอ
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+    // =================================================================
+    // ** 🎯 CONFIGURATION ที่ได้รับการอัปเดตตามที่คุณระบุ **
+    // =================================================================
+    const firebaseConfig = {
+      // อัปเดตตามที่ผู้ใช้ร้องขอ
+      apiKey: "AIzaSyCeRhD4w2mZ2VoOxTcEXn8jL1Fa3wsGC0E", // <-- อัปเดต
+      authDomain: "tn-messenger-serviceso.firebaseapp.com", // <-- อัปเดต
+      projectId: "tn-messenger-serviceso", // <-- อัปเดต
+      storageBucket: "tn-messenger-serviceso.firebasestorage.app", // <-- อัปเดต
+      messagingSenderId: "5307950588", // <-- อัปเดต
+      appId: "1:5307950588:web:c7109253c5b19a4c72fe79", // <-- อัปเดต
+      measurementId: "G-GBDS31TT6Q" // <-- อัปเดต
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    // 🟢 NEW: เริ่มต้น Firebase Analytics
+    const analytics = getAnalytics(app);
+
+    window.firebaseAuth = auth;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    // 🟢 NEW: ทำให้ analytics ใช้งานได้ทั่วโลก (ถ้าจำเป็น)
+    window.firebaseAnalytics = analytics;
+  </script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --text: #111827;
+      --text-light: #6b7280;
+      --bg: #f3f4f6;
+      --white: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      display: flex;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* REGISTER CONTAINER STYLES */
+    .register-container {
+      width: 100%;
+      max-width: 420px;
+      background: var(--white);
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      border-top: 8px solid var(--primary);
+      text-align: center;
+      margin: 20px;
+    }
+
+    .register-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      margin: 0 auto 15px;
+    }
+
+    .register-container h2 {
+      font-size: 26px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .register-container p {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      transition: border-color 0.2s;
+      padding-right: 45px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(12px);
+      cursor: pointer;
+      color: var(--text-light);
+      z-index: 10;
+    }
+
+    .toggle-password:hover {
+      color: var(--primary);
+    }
+
+    .register-button {
+      width: 100%;
+      padding: 14px;
+      background: #059669;
+      color: var(--white);
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .register-button:hover {
+      background: #047857;
+    }
+
+    /* Message Styles */
+    .message-success {
+      color: #059669;
+    }
+
+    .message-error {
+      color: #ef4444;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="register-container">
+    <div class="register-logo">TN</div>
+    <h2>ลงทะเบียนผู้ใช้ใหม่</h2>
+    <p>สร้างบัญชีเพื่อเข้าถึงระบบจัดการใบสั่งงาน</p>
+
+    <form onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label for="email">อีเมล (Email)</label>
+        <input type="email" id="email" name="email" required placeholder="ใช้สำหรับเข้าสู่ระบบ" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">รหัสผ่าน (Password)</label>
+        <input type="password" id="password" name="password" required minlength="6"
+          placeholder="รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" />
+        <i data-feather="eye-off" class="toggle-password" onclick="togglePasswordVisibility('password')"></i>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6"
+          placeholder="ป้อนรหัสผ่านซ้ำอีกครั้ง" />
+        <i data-feather="eye-off" class="toggle-password" onclick="togglePasswordVisibility('confirmPassword')"></i>
+      </div>
+
+      <div id="registerMessage"
+        style="text-align: center; margin-bottom: 15px; font-size: 14px; font-weight: 500; min-height: 20px;"></div>
+
+      <button type="submit" class="register-button">
+        <i data-feather="user-plus"></i> สมัครสมาชิก
+      </button>
+
+      </form>
+    
+    </div>
+
+
+  <script>
+    feather.replace();
+
+    /**
+     * ฟังก์ชันช่วยในการแสดงข้อความแจ้งเตือนในฟอร์ม
+     */
+    function displayRegisterMessage(message, type = 'error') {
+      const messageElement = document.getElementById('registerMessage');
+      messageElement.textContent = message;
+      messageElement.className = '';
+
+      if (type === 'success') {
+        messageElement.classList.add('message-success');
+      } else {
+        messageElement.classList.add('message-error');
+      }
+      
+      // ลบข้อความออกอัตโนมัติเพื่อให้ผู้ใช้สามารถพยายามสมัครใหม่ได้
+      setTimeout(() => {
+        messageElement.textContent = '';
+        messageElement.className = '';
+      }, 5000);
+    }
+
+    // ฟังก์ชันสลับการมองเห็นรหัสผ่าน
+    function togglePasswordVisibility(fieldId) {
+      const passwordField = document.getElementById(fieldId);
+      const toggleIcon = passwordField.nextElementSibling;
+
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleIcon.setAttribute('data-feather', 'eye');
+      } else {
+        passwordField.type = 'password';
+        toggleIcon.setAttribute('data-feather', 'eye-off');
+      }
+      feather.replace();
+    }
+
+
+    /**
+     * ฟังก์ชันจัดการการสมัครสมาชิก
+     */
+    async function handleRegister(event) {
+      event.preventDefault();
+      document.getElementById('registerMessage').textContent = '';
+
+      // ดึงค่าจากฟอร์ม
+      const emailInput = document.getElementById('email').value;
+      const passwordInput = document.getElementById('password').value;
+      const confirmPasswordInput = document.getElementById('confirmPassword').value;
+
+      // STEP 1: ตรวจสอบรหัสผ่านว่าตรงกันหรือไม่
+      if (passwordInput !== confirmPasswordInput) {
+        displayRegisterMessage('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน', 'error');
+        return;
+      }
+
+      // STEP 2: ทำการสมัครสมาชิกกับ Firebase
+      try {
+        await window.createUserWithEmailAndPassword(
+          window.firebaseAuth,
+          emailInput,
+          passwordInput
+        );
+        
+        // สมัครสมาชิกสำเร็จ:
+        displayRegisterMessage('ลงทะเบียนบัญชีใหม่สำเร็จ!', 'success');
+
+        // เคลียร์ฟอร์มหลังลงทะเบียนสำเร็จ
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('confirmPassword').value = '';
+
+        // NOTE: หลังจากสมัครสมาชิกแล้ว Firebase จะทำการล็อกอินผู้ใช้โดยอัตโนมัติ
+        // หากต้องการเปลี่ยนไปหน้า Dashboard เลย สามารถทำได้ที่นี่
+        // window.location.href = 'dashboard.html';
+        
+      } catch (error) {
+        const errorCode = error.code;
+        let displayMessage = 'เกิดข้อผิดพลาดในการลงทะเบียน โปรดลองอีกครั้ง';
+
+        if (errorCode === 'auth/email-already-in-use') {
+          displayMessage = 'อีเมลนี้ถูกใช้ลงทะเบียนไปแล้ว';
+        } else if (errorCode === 'auth/invalid-email') {
+          displayMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+        } else if (errorCode === 'auth/weak-password') {
+          displayMessage = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+        } else {
+          console.error("Register Error:", errorCode, error.message);
+        }
+
+        // แสดงข้อความแจ้งเตือนความผิดพลาด
+        displayRegisterMessage(displayMessage, 'error');
+      }
+    }
+  </script>
+
+</body>
+
+</html>

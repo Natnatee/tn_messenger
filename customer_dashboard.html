@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TN Messenger Service - Dashboard ลูกค้า</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      /* Blue-900 (สีน้ำเงินเข้มสำหรับ Tracking) */
+      --primary-light: #3b82f6;
+      /* Blue-500 (สีฟ้าอ่อน) */
+      --secondary: #059669;
+      /* Emerald-600 (สีเขียวสำหรับ สร้างใบสั่งงาน) */
+      --text: #111827;
+      /* Gray-900 */
+      --text-light: #6b7280;
+      /* Gray-500 */
+      --bg: #f3f4f6;
+      /* Gray-100 */
+      --white: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      display: flex;
+      min-height: 100vh;
+      justify-content: center;
+      padding: 30px 15px;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 38px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 18px;
+      color: var(--text-light);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 50px;
+      margin-bottom: 20px;
+    }
+
+    /* 🟢 กำหนดสไตล์เริ่มต้นเป็นสีเขียว (Secondary) สำหรับปุ่ม "สร้างใบสั่งงาน" */
+    .action-button {
+      flex: 1;
+      max-width: 300px;
+      padding: 15px 25px;
+      background: var(--secondary); 
+      color: var(--white);
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.4);
+    }
+
+    /* กำหนดให้ปุ่ม "เช็คสถานะ" ใช้สีน้ำเงินเข้ม (Primary) */
+    .action-button.action-status {
+      background: var(--primary);
+      box-shadow: 0 4px 10px rgba(30, 58, 138, 0.4);
+    }
+
+    /* 🔄 โค้ดที่แก้ไข: กำหนดให้ปุ่ม "เช็คข่าวสาร" ใช้สีฟ้าอ่อน (Primary-light) */
+    .action-button.action-news {
+      background: var(--primary-light); 
+      /* อัปเดตเงาให้เข้ากับสีใหม่ (Blue-500: #3b82f6) */
+      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); 
+    }
+
+    .action-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .branch-section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 10px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .branch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .branch-card {
+      background: transparent;
+      padding: 0px;
+      border-radius: 0px;
+      box-shadow: none;
+      border: none;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 28px;
+      text-align: center;
+      transition: color 0.2s;
+    }
+
+    .branch-card:hover {
+      background: none;
+      color: var(--primary-light);
+    }
+
+    .loading-message {
+      text-align: center;
+      padding: 50px;
+      color: var(--text-light);
+      font-size: 16px;
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 30px;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 30px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .action-button {
+        max-width: 100%;
+      }
+
+      .branch-card {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="header">
+      <h1>TN MESSENGER SERVICE</h1>
+      <p>ยินดีต้อนรับสู่ Dashboard ลูกค้า</p>
+    </div>
+
+    <div class="branch-section-title">
+      <i data-feather="map-pin" style="width:24px; height:24px;"></i> สาขาที่เปิดให้บริการ (ตามจังหวัด)
+    </div>
+
+    <div id="branchListContainer" class="loading-message">
+      กำลังโหลดข้อมูลสาขาที่ให้บริการ...
+    </div>
+
+    <div class="action-buttons">
+      <button class="action-button" onclick="createWorkOrder()">
+        <i data-feather="file-text"></i> สร้างใบสั่งงาน
+      </button>
+
+      <button class="action-button action-status" onclick="checkStatus()">
+        <i data-feather="package"></i> เช็คสถานะ (Tracking)
+      </button>
+      
+      <button class="action-button action-news" onclick="checkNews()">
+        <i data-feather="bell"></i> เช็คข่าวสาร
+      </button>
+    </div>
+    </div>
+
+  <script>
+    feather.replace();
+
+    /**
+     * ✅ Google Sheet ID จาก URL ที่คุณให้มา
+     */
+    const SHEET_ID = "1wcc009IhaRd95QDOdqgoGCmBWqQQe5nJc4xLxVEpNLQ"; 
+    // ชื่อแท็บชีตสำหรับ "สาขาที่เปิดให้บริการ"
+    const SHEET_NAME = "ที่อยู่ โครงการ เอกสารที่ต้องจัดเก็บ"; 
+    
+    // URL สำหรับดึงข้อมูลในรูปแบบ CSV
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}&cacheBust=${Date.now()}`;
+
+
+    function showMessageBox(title, message) {
+      const tempMsg = document.createElement('div');
+      tempMsg.className = 'error-message';
+      tempMsg.style.backgroundColor = '#e0f7fa'; 
+      tempMsg.style.color = '#006064'; 
+      tempMsg.style.marginBottom = '20px';
+      tempMsg.innerHTML = `<strong>${title}</strong>: ${message}`;
+
+      const main = document.querySelector('.main-container');
+      main.insertBefore(tempMsg, main.firstChild.nextSibling);
+
+      setTimeout(() => {
+        tempMsg.remove();
+      }, 5000);
+    }
+    
+    /**
+     * ฟังก์ชันสำหรับปุ่ม "สร้างใบสั่งงาน"
+     */
+    function createWorkOrder() {
+      window.location.href = './customer_workorder.html';
+    }
+    
+    /**
+     * ฟังก์ชันสำหรับปุ่ม "เช็คสถานะ"
+     */
+    function checkStatus() {
+      window.location.href = './tracking_2.html';
+    }
+
+    /**
+     * ฟังก์ชันสำหรับปุ่ม "เช็คข่าวสาร"
+     */
+    function checkNews() {
+      window.location.href = './news_page.html';
+    }
+
+    /**
+     * ฟังก์ชันสำหรับโหลดและแสดงข้อมูลสาขาจาก Google Sheet (ใช้ CSV)
+     */
+    async function loadBranchData() {
+      const container = document.getElementById('branchListContainer');
+      container.innerHTML = '<div class="loading-message">กำลังโหลดข้อมูลสาขาที่ให้บริการ...</div>';
+
+      try {
+        // ดึงข้อมูล CSV โดยตรง
+        const response = await fetch(CSV_URL); 
+
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}.`);
+        }
+
+        const csvText = await response.text();
+        
+        // 1. แยกบรรทัดและเซลล์
+        const rows = csvText.split('\n').map(row => row.trim()).filter(row => row.length > 0);
+        
+        if (rows.length < 2) {
+          container.innerHTML = '<div class="loading-message">ไม่พบข้อมูลสาขาที่เปิดให้บริการใน CSV</div>';
+          return;
+        }
+
+        // 2. ฟังก์ชันช่วยแยก CSV อย่างง่าย
+        const csvRowToArray = (row) => {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim().replace(/^"|"$/g, ''));
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim().replace(/^"|"$/g, '')); 
+            return result;
+        };
+
+        const header = csvRowToArray(rows[0]);
+        const provinceColIndex = header.indexOf('จังหวัด'); // ค้นหาคอลัมน์ 'จังหวัด'
+        
+        if (provinceColIndex === -1) {
+             throw new Error('ไม่พบหัวคอลัมน์ "จังหวัด" ในไฟล์ CSV (โปรดตรวจสอบว่าสะกดถูกต้อง)');
+        }
+
+        // 3. ดึงข้อมูลจังหวัดจากแถวข้อมูล
+        const dataRows = rows.slice(1);
+        const provinces = dataRows.map(row => {
+            const columns = csvRowToArray(row);
+            return columns[provinceColIndex];
+        }).filter(province => province && String(province).trim() !== ""); // กรองค่าว่าง
+
+        
+        // 4. กรองให้เหลือจังหวัดที่ไม่ซ้ำกัน
+        const uniqueProvinces = [...new Set(provinces)];
+
+        if (uniqueProvinces.length === 0) {
+          container.innerHTML = '<div class="loading-message">ไม่พบข้อมูลจังหวัดที่เปิดให้บริการ</div>';
+          return;
+        }
+
+        // 5. แสดงผล
+        let branchHtml = '<div class="branch-grid">';
+        uniqueProvinces.forEach(province => {
+          branchHtml += `<div class="branch-card">${province}</div>`;
+        });
+        branchHtml += '</div>';
+
+        container.innerHTML = branchHtml;
+
+      } catch (error) {
+        console.error("Error loading branch data:", error);
+        container.innerHTML = `<div class="error-message">
+                                <strong>ขออภัย!</strong> ไม่สามารถโหลดข้อมูลสาขาได้<br>
+                                **ข้อผิดพลาด:** ${error.message}<br>
+                                **สิ่งที่ต้องตรวจสอบ:**<br>
+                                1. Google Sheet ID ถูกต้องหรือไม่<br>
+                                2. Sheet **"${SHEET_NAME}"** ถูกตั้งค่าเป็น **"ทุกคนที่มีลิงก์สามารถดูได้"** หรือไม่<br>
+                                3. คอลัมน์แรกใน Sheet คือ **"จังหวัด"** ใช่หรือไม่
+                               </div>`;
+      }
+    }
+
+    loadBranchData();
+  </script>
+
+</body>
+
+</html>

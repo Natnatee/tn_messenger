@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ติดตามสถานะงาน - TN Messenger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #111827;
+            --bg: #f3f4f6;
+            --white: #ffffff;
+            --border: #d1d5db;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            background: var(--white);
+            padding: 35px 40px;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+            border-top: 6px solid var(--primary);
+        }
+
+        /* **************** เริ่มแก้ไข CSS สำหรับ h1 **************** */
+        .search-box h1 {
+            color: var(--primary);
+            font-size: 26px;
+            font-weight: 700;
+            /* เปลี่ยน margin-bottom เป็น 0 */
+            margin-bottom: 0;
+            text-align: center;
+        }
+
+        /* **************** สิ้นสุดการแก้ไข CSS **************** */
+
+
+        .search-input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .search-input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.25s ease;
+            background-color: #fdfdfd;
+        }
+
+        .search-input-group input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        .search-input-group button {
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .search-input-group button:hover {
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .search-input-group button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #loadingMsg {
+            text-align: center;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            display: none;
+            color: #6b7280;
+            font-size: 16px;
+            border-top: 6px solid var(--primary);
+        }
+
+        #loadingMsg.show {
+            display: block;
+        }
+
+        #errorMsg {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+            border-left: 4px solid #ef4444;
+        }
+
+        #errorMsg.show {
+            display: block;
+        }
+
+        .tracking-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: none;
+            border-top: 6px solid var(--primary);
+        }
+
+        .tracking-card.show {
+            display: block;
+        }
+
+        .card-header {
+            background: var(--white);
+            padding: 30px 40px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .order-number {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .order-id {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .card-body {
+            padding: 35px 40px;
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .info-title {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 15px;
+            color: var(--text);
+            font-weight: 500;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .timeline-section {
+            margin-top: 35px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 50px;
+            margin-top: 25px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #d1d5db;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -38px;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            z-index: 1;
+            background: white;
+            border: 2px solid #d1d5db;
+            transition: all 0.3s ease;
+            color: #6b7280;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        /* สีสถานะ */
+        .timeline-dot.success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .timeline-dot.warning {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .timeline-dot.error {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .timeline-dot.pending {
+            border-color: #9ca3af;
+            color: #9ca3af;
+        }
+
+
+        .timeline-item:first-child .timeline-dot {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .timeline-content {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.25s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .timeline-content:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            transform: translateX(2px);
+        }
+
+        .timeline-status {
+            font-weight: 600;
+            font-size: 17px;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .timeline-date {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timeline-date strong {
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .timeline-note {
+            font-size: 14px;
+            color: #4b5563;
+            line-height: 1.7;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .timeline-note strong {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .empty-timeline {
+            text-align: center;
+            color: #6b7280;
+            padding: 30px;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+        }
+
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .search-box,
+            .card-body {
+                padding: 25px 20px;
+            }
+
+            .card-header {
+                padding: 25px 20px;
+            }
+
+            .search-input-group {
+                flex-direction: column;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline {
+                padding-left: 45px;
+            }
+
+            .timeline-dot {
+                left: -35px;
+                width: 36px;
+                height: 36px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .search-box,
+            .card-body {
+                padding: 20px 15px;
+            }
+
+            .order-id {
+                font-size: 24px;
+            }
+
+            .timeline {
+                padding-left: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="search-box">
+            <div
+                style="display: flex; justify-content: flex-end; align-items: center; position: relative; margin-bottom: 20px;">
+
+                <h1 style="position: absolute; left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap;">
+                    ติดตามสถานะงาน</h1>
+
+                <a href="customer_workorder.html" style="
+                    display: inline-block;
+                    background: #3b82f6; /* สีฟ้าอ่อน */
+                    color: white;
+                    padding: 8px 15px; /* ลดขนาดปุ่มเล็กน้อย */
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    transition: all 0.25s ease;
+                    white-space: nowrap; /* ไม่ให้ข้อความตัดบรรทัด */
+                    z-index: 10; /* ให้ปุ่มอยู่เหนือ h1 เผื่อกรณีจอเล็ก */
+                " onmouseover="this.style.backgroundColor='#1e3a8a'" onmouseout="this.style.backgroundColor='#3b82f6'">
+                    📝 ออกใบสั่งงานใหม่
+                </a>
+            </div>
+            <div class="search-input-group">
+                <input type="text" id="orderInput" placeholder="กรอกเลขที่ใบสั่งงาน (เช่น 0001)" />
+                <button id="searchBtn" onclick="searchOrder()">ค้นหา</button>
+            </div>
+        </div>
+        <div id="loadingMsg">กำลังค้นหาข้อมูล...</div>
+        <div id="errorMsg"></div>
+
+        <div class="tracking-card" id="trackingCard">
+            <div class="card-header">
+                <div class="order-number">เลขที่ใบสั่งงาน</div>
+                <div class="order-id" id="displayOrderNo">-</div>
+            </div>
+
+            <div class="card-body">
+                <div class="info-section">
+                    <div class="info-title">ข้อมูลทั่วไป</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">ทีม</span>
+                            <span class="info-value" id="team">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ผู้สั่งงาน</span>
+                            <span class="info-value" id="requester">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">เบอร์โทรศัพท์</span>
+                            <span class="info-value" id="phone">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">โครงการ</span>
+                            <span class="info-value" id="project">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">วันที่เก็บเอกสาร</span>
+                            <span class="info-value" id="collectDate">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ลูกค้า</span>
+                            <span class="info-value" id="customer">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-title">สถานที่จัดส่ง</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">เลขที่/ถนน</span>
+                            <span class="info-value" id="addrStreet">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">แขวง/ตำบล</span>
+                            <span class="info-value" id="subdistrict">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">เขต/อำเภอ</span>
+                            <span class="info-value" id="district">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">จังหวัด/รหัสไปรษณีย์</span>
+                            <span class="info-value" id="province">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-section">
+                    <div class="info-title">สถานะการวิ่งงาน</div>
+                    <div class="timeline" id="timeline"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_ID = "1FkcnGM31UU1UNgsPyCrl95Jp1NDO98RlXpeU9a0eg_M";
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ใบสั่งงาน&cacheBust=${Date.now()}`;
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwutGjM8fg__QRCBYBiDsCJ8ttkQ-97v8gER_C_W7VB4TG5-vvX5doUXlbGc5bvZYM5/exec";
+
+        let currentOrderNo = null;
+
+        // อ่านค่า order จาก URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderFromURL = urlParams.get("order");
+
+        if (orderFromURL) {
+            document.getElementById('orderInput').value = orderFromURL;
+            window.addEventListener('DOMContentLoaded', function () {
+                searchOrder();
+            });
+        }
+
+
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+            setTimeout(() => errorMsg.classList.remove('show'), 5000);
+        }
+
+        function getStatusIcon(status) {
+            // ลบ Emoji ออกแล้วให้ค่าว่างแทน และกำหนด class เพื่อเปลี่ยนสี dot
+            const statusMap = {
+                'สำเร็จ': {
+                    emoji: '●',
+                    class: 'success'
+                },
+                'ลูกค้าขอเลื่อน': {
+                    emoji: '!',
+                    class: 'warning'
+                },
+                'ลูกค้าไม่รับสาย': {
+                    emoji: '✖',
+                    class: 'error'
+                },
+                'พนักงานขอเลื่อน': {
+                    emoji: '!',
+                    class: 'warning'
+                },
+                'ลูกค้าขอยกเลิก': {
+                    emoji: '✖',
+                    class: 'error'
+                },
+                'ใบหน้างานซ้ำ': {
+                    emoji: '?',
+                    class: 'warning'
+                }
+            };
+            // เปลี่ยนจากอิโมจิเป็นสัญลักษณ์พื้นฐาน หรือใช้ค่าว่างเพื่อให้ dot แสดงแค่สี
+            return statusMap[status] || {
+                emoji: '…',
+                class: 'pending'
+            };
+        }
+
+
+        async function searchOrder() {
+            const orderNo = document.getElementById('orderInput').value.trim();
+            if (!orderNo) {
+                showError('⚠ กรุณากรอกเลขที่ใบสั่งงาน');
+                return;
+            }
+
+            currentOrderNo = orderNo;
+            const loadingMsg = document.getElementById('loadingMsg');
+            const trackingCard = document.getElementById('trackingCard');
+            const searchBtn = document.getElementById('searchBtn');
+
+            loadingMsg.classList.add('show');
+            trackingCard.classList.remove('show');
+            searchBtn.disabled = true;
+
+            try {
+                const res = await fetch(CSV_URL);
+                const csvText = await res.text();
+                const rows = csvText.trim().split("\n").map(r =>
+                    r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+                );
+
+                if (rows.length <= 1) {
+                    showError('⚠ ไม่พบข้อมูลในระบบ');
+                    return;
+                }
+
+                const dataRows = rows.slice(1);
+                const orderRow = dataRows.find(r => {
+                    // Index การค้นหาที่ถูกต้อง: 16 (Column Q: เลขที่ใบสั่งงาน)
+                    const rowOrderNo = (r[16] || "").replace(/"/g, '').trim();
+                    return String(Number(rowOrderNo)) === String(Number(orderNo));
+                });
+
+                if (!orderRow) {
+                    showError(`⚠ ไม่พบเลขที่ใบสั่งงาน ${orderNo}`);
+                    return;
+                }
+
+                displayOrderInfo(orderRow);
+                trackingCard.classList.add('show');
+
+            } catch (err) {
+                showError('⚠ เกิดข้อผิดพลาด: ' + err.message);
+            } finally {
+                loadingMsg.classList.remove('show');
+                searchBtn.disabled = false;
+            }
+        }
+
+        function displayOrderInfo(row) {
+            const clean = text => (text || "").replace(/"/g, "").trim();
+
+            // *** Index ที่แก้ไขให้ตรงกับชีตของคุณ ***
+            document.getElementById('displayOrderNo').textContent = clean(row[16]); // Q
+            document.getElementById('team').textContent = clean(row[3]) || '-'; // D
+            document.getElementById('requester').textContent = clean(row[4]) || '-'; // E
+            document.getElementById('phone').textContent = clean(row[5]) || '-'; // F
+            document.getElementById('project').textContent = clean(row[2]) || '-'; // C
+            document.getElementById('collectDate').textContent = clean(row[1]) || '-'; // B
+            document.getElementById('customer').textContent = clean(row[6]) || '-'; // G
+            document.getElementById('addrStreet').textContent = clean(row[9]) || '-'; // J
+            document.getElementById('subdistrict').textContent = clean(row[10]) || '-'; // K
+            document.getElementById('district').textContent = clean(row[11]) || '-'; // L
+            document.getElementById('province').textContent = clean(row[12]) || '-'; // M
+
+            buildTimeline(row);
+        }
+
+        function buildTimeline(row) {
+            const clean = text => (text || "").replace(/"/g, "").trim();
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+
+            const results = [{
+                // ผลการวิ่งงาน 1: R, S, T (Index 17, 18, 19)
+                status: clean(row[17]),
+                date: clean(row[18]),
+                note: clean(row[19]),
+                label: 'สถานะครั้งที่ 1'
+            },
+            {
+                // ผลการวิ่งงาน 2: U, V, W (Index 20, 21, 22)
+                status: clean(row[20]),
+                date: clean(row[21]),
+                note: clean(row[22]),
+                label: 'สถานะครั้งที่ 2'
+            },
+            {
+                // ผลการวิ่งงาน 3: X, Y, Z (Index 23, 24, 25)
+                status: clean(row[23]),
+                date: clean(row[24]),
+                note: clean(row[25]),
+                label: 'สถานะครั้งที่ 3'
+            }
+            ].filter(r => r.status); // กรองเฉพาะรายการที่มีสถานะอยู่
+
+            if (results.length === 0) {
+                timeline.innerHTML = '<div class="empty-timeline">ยังไม่มีการอัปเดตสถานะ<br><small style="color:#9ca3af; margin-top:8px; display:block;">กรุณารอการอัปเดตจากทีมงาน</small></div>';
+                return;
+            }
+
+            results.forEach((result) => {
+                const statusInfo = getStatusIcon(result.status);
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+
+                // ใช้ statusInfo.emoji เพื่อแสดงสัญลักษณ์แทนอิโมจิ
+                item.innerHTML = `
+                    <div class="timeline-dot ${statusInfo.class}">${statusInfo.emoji}</div>
+                    <div class="timeline-content ${statusInfo.class}">
+                        <div class="timeline-status">${result.label}: ${result.status}</div>
+                        ${result.date ? `<div class="timeline-date"><strong>วันที่:</strong> ${formatThaiDate(result.date)}</div>` : ''}
+                        ${result.note ? `<div class="timeline-note"><strong>หมายเหตุ:</strong> ${result.note}</div>` : ''}
+                    </div>
+                `;
+
+                timeline.appendChild(item);
+            });
+        }
+
+        function formatThaiDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date)) {
+                    return dateStr;
+                }
+                return date.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        document.getElementById('orderInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchOrder();
+        });
+    </script>
+</body>
+
+</html>

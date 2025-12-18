@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TN Messenger Service - ข้อมูลบัญชีผู้ใช้</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <!-- --------------------------------- -->
+  <!-- 1. FIREBASE SDK AND CONFIGURATION -->
+  <!-- --------------------------------- -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    // 🔴 REMOVED: ลบ signOut เพราะไม่มีปุ่มออกจากระบบแล้ว
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+    // 🎯 CONFIGURATION
+    // 🟢 UPDATED: ใช้การตั้งค่า Firebase ใหม่ตามที่ผู้ใช้ระบุ
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJuzeWubCbptP53uAhraSA587ldtar74A",
+      authDomain: "tn-messenger-servicess.firebaseapp.com",
+      projectId: "tn-messenger-servicess",
+      storageBucket: "tn-messenger-servicess.firebasestorage.app",
+      messagingSenderId: "563656707840",
+      appId: "1:563656707840:web:c7a484757eecac9b3c2de5",
+      measurementId: "G-LM1JH2LDXH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const analytics = getAnalytics(app);
+
+    window.firebaseAuth = auth;
+
+    /**
+     * ดึงข้อมูลผู้ใช้ปัจจุบันมาแสดง
+     */
+    function loadCurrentUser(user) {
+      const detailContainer = document.getElementById('accountDetails');
+      const cardContainer = document.getElementById('accountCard');
+      // 🟢 แก้ไข: เพิ่มการแสดงชื่อผู้ใช้ (Display Name) ถ้ามี
+      const userName = user.displayName || (user.email ? user.email.split('@')[0] : 'ผู้ใช้');
+      const registerTime = new Date(user.metadata.creationTime).toLocaleString('th-TH');
+
+      let html = `
+        <div class="detail-row">
+            <span class="label">ชื่อผู้ใช้</span>
+            <span class="value">${userName}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">สถานะ</span>
+            <span class="value status-active">เข้าสู่ระบบ</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">UID (User ID)</span>
+            <span class="value">${user.uid}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">อีเมล</span>
+            <span class="value">${user.email || 'ไม่ระบุ'}</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">ลงทะเบียนเมื่อ</span>
+            <span class="value">${registerTime}</span>
+        </div>
+      `;
+      detailContainer.innerHTML = html;
+
+      // 🟢 แสดงผลองค์ประกอบที่ซ่อนไว้ทั้งหมดหลังจากโหลดข้อมูลเสร็จ
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('redirectingMessage').style.display = 'none';
+      
+      cardContainer.style.display = 'block'; // แสดง Account Card
+      // 🔴 REMOVED: ลบการแสดงปุ่มออกจากระบบ
+    }
+    
+    // 🔴 REMOVED: ลบฟังก์ชัน handleSignOut() ออกเพราะไม่มีปุ่มให้เรียกใช้แล้ว
+
+
+    // ตรวจสอบสถานะการเข้าสู่ระบบ
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // ผู้ใช้ล็อกอินแล้ว
+        loadCurrentUser(user);
+      } else {
+        // ผู้ใช้ยังไม่ได้ล็อกอิน หรือเซสชันหมดอายุ
+        // 🟢 การหน่วงเวลา 1.5 วินาทีช่วยให้ผู้ใช้เห็นข้อความแจ้งเตือนก่อนเด้ง
+        console.warn("User not logged in. Redirecting to dashboard.");
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('redirectingMessage').style.display = 'block';
+        
+        // หน่วงเวลาเล็กน้อยเพื่อให้ผู้ใช้เห็นข้อความ
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 1500); // หน่วง 1.5 วินาที
+      }
+    });
+
+  </script>
+
+  <!-- --------------------------------- -->
+  <!-- 2. CSS STYLES -->
+  <!-- --------------------------------- -->
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --text: #111827;
+      --text-light: #6b7280;
+      --bg: #f3f4f6;
+      --white: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      display: flex;
+      min-height: 100vh;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .header {
+      margin-bottom: 30px;
+      text-align: center;
+      position: relative; /* เพื่อให้สามารถจัดตำแหน่งปุ่ม back-button-top ได้ */
+      padding-top: 50px; /* เพิ่ม padding เพื่อให้มีที่ว่างสำหรับปุ่ม */
+    }
+
+    /* 🟢 UPDATED: เปลี่ยนสีปุ่มเป็นสีธีมหลัก */
+    .back-button-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 15px;
+        background: var(--primary); /* ใช้สีธีมหลัก */
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    .back-button-top:hover {
+      background: #102e70; /* ใช้สีเข้มขึ้นเล็กน้อยสำหรับ hover (จาก dashboard.html hover) */
+    }
+
+
+    .header h1 {
+      font-size: 34px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 16px;
+      color: var(--text-light);
+    }
+    
+    .account-card {
+      background: var(--white);
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      border-top: 6px solid var(--primary);
+      /* 🔴 REMOVED: ลบ margin-bottom ออกเล็กน้อยเนื่องจากไม่มีปุ่มออกจากระบบแล้ว */
+      margin-bottom: 10px; 
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px dashed #f3f4f6;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      font-weight: 500;
+      color: var(--text-light);
+      width: 150px;
+    }
+
+    .value {
+      font-weight: 600;
+      color: var(--text);
+      flex-grow: 1;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .status-active {
+      color: #10b981;
+      /* emerald-500 */
+    }
+
+    .loading-message {
+        text-align: center;
+        padding: 50px;
+        color: var(--text-light);
+    }
+
+    .redirecting-message {
+        text-align: center;
+        padding: 50px;
+        color: #ef4444; /* red-500 */
+        font-weight: 600;
+        display: none; /* ซ่อนไว้ก่อน */
+    }
+
+    /* 🔴 REMOVED: ลบสไตล์ที่เกี่ยวข้องกับปุ่มออกจากระบบ (sign-out-button) ออก */
+    
+    @media (max-width: 600px) {
+        .header {
+            padding-top: 30px; /* ลด padding บนมือถือ */
+        }
+        .back-button-top {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        .header h1 {
+            font-size: 28px;
+        }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    
+    <div class="header">
+        <!-- 🟢 NEW: ปุ่มถูกย้ายมาอยู่ตรงนี้ -->
+        <a href="dashboard.html" class="back-button-top">
+            <i data-feather="arrow-left" style="width:18px; height:18px;"></i> กลับสู่ Dashboard
+        </a>
+        
+        <h1 onclick="window.location.href='dashboard.html'" style="cursor: pointer;">ข้อมูลบัญชีผู้ใช้</h1>
+        <p>รายละเอียดบัญชีของคุณที่ใช้เข้าสู่ระบบระบบ TN Messenger Service</p>
+    </div>
+
+
+    <div id="loading" class="loading-message">
+        <i data-feather="loader" style="animation: spin 1s linear infinite;"></i> กำลังโหลดข้อมูลบัญชี...
+    </div>
+
+    <!-- 🟢 NEW: เพิ่มข้อความแจ้งเตือนเมื่อไม่มีการล็อกอิน -->
+    <div id="redirectingMessage" class="redirecting-message">
+        <i data-feather="alert-triangle" style="width:24px; height:24px;"></i> กรุณาล็อกอินก่อน: กำลังเปลี่ยนเส้นทางกลับไปหน้า Dashboard...
+    </div>
+
+
+    <div id="accountCard" class="account-card" style="display: none;">
+      <div class="card-title">
+        <i data-feather="user" style="width:20px; height:20px;"></i> รายละเอียดบัญชีปัจจุบัน
+      </div>
+      <div id="accountDetails">
+        <!-- ข้อมูลบัญชีจะถูกแทรกที่นี่โดย JavaScript -->
+      </div>
+      
+      <!-- 🔴 REMOVED: ลบปุ่ม Sign Out ออก -->
+
+    </div>
+
+  </div>
+
+  <script>
+    feather.replace();
+  </script>
+
+</body>
+
+</html>

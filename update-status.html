@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>📦 อัปเดตสถานะใบสั่งงาน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 540px;
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      text-align: center;
+      color: #1f2937;
+    }
+
+    #orderInfo {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .order-badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 8px 16px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    .result-section {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .result-section h3 {
+      margin: 0 0 15px 0;
+      color: #374151;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .result-section.active {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-weight: 500;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    select,
+    input,
+    textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px #93c5fd;
+    }
+
+    input[readonly] {
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 14px 20px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.25s ease;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #resultMsg {
+      text-align: center;
+      margin-top: 18px;
+      font-weight: 500;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    #resultMsg.show {
+      display: block;
+    }
+
+    #resultMsg.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    #resultMsg.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    #resultMsg.loading {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .box {
+        padding: 20px;
+        border-radius: 12px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>📦 อัปเดตสถานะใบสั่งงาน</h1>
+    <p id="orderInfo">กรอกเลขที่ใบสั่งงาน หรือตรวจจากลิงก์ QR</p>
+
+    <form id="updateForm">
+      <label>เลขที่ใบสั่งงาน</label>
+      <input type="text" name="orderNo" id="orderNoInput" placeholder="เช่น 0001" required /><br>
+      
+      <div class="input-group">
+        <label for="messengerName">👤 ชื่อพนักงาน (ผู้ทำการวิ่งงาน)</label>
+        <input type="text" name="messengerName" id="messengerName" placeholder="กรอกชื่อพนักงาน" required>
+      </div>
+      <br>
+
+      <div class="result-section" id="section1">
+        <h3>🚚 ผลการวิ่งงาน 1</h3>
+        <label>สถานะ</label>
+        <select name="result1" id="result1">
+          <option value="">-- เลือกสถานะ --</option>
+          <option>สำเร็จ</option>
+          <option>ลูกค้าขอเลื่อน</option>
+          <option>ลูกค้าไม่รับสาย</option>
+          <option>พนักงานขอเลื่อน</option>
+          <option>ลูกค้าขอยกเลิก</option>
+          <option>ใบหน้างานซ้ำ</option>
+        </select>
+        <label>วัน/เดือน/ปี</label>
+        <input type="date" name="date1" id="date1" />
+        <label>หมายเหตุ</label>
+        <textarea name="note1" id="note1" placeholder="บันทึกเพิ่มเติม..."></textarea>
+      </div>
+
+      <div class="result-section" id="section2">
+        <h3>🚚 ผลการวิ่งงาน 2</h3>
+        <label>สถานะ</label>
+        <select name="result2" id="result2">
+          <option value="">-- เลือกสถานะ --</option>
+          <option>สำเร็จ</option>
+          <option>ลูกค้าขอเลื่อน</option>
+          <option>ลูกค้าไม่รับสาย</option>
+          <option>พนักงานขอเลื่อน</option>
+          <option>ลูกค้าขอยกเลิก</option>
+          <option>ใบหน้างานซ้ำ</option>
+        </select>
+        <label>วัน/เดือน/ปี</label>
+        <input type="date" name="date2" id="date2" />
+        <label>หมายเหตุ</label>
+        <textarea name="note2" id="note2" placeholder="บันทึกเพิ่มเติม..."></textarea>
+      </div>
+
+      <div class="result-section" id="section3">
+        <h3>🚚 ผลการวิ่งงาน 3</h3>
+        <label>สถานะ</label>
+        <select name="result3" id="result3">
+          <option value="">-- เลือกสถานะ --</option>
+          <option>สำเร็จ</option>
+          <option>ลูกค้าขอเลื่อน</option>
+          <option>ลูกค้าไม่รับสาย</option>
+          <option>พนักงานขอเลื่อน</option>
+          <option>ลูกค้าขอยกเลิก</option>
+          <option>ใบหน้างานซ้ำ</option>
+        </select>
+        <label>วัน/เดือน/ปี</label>
+        <input type="date" name="date3" id="date3" />
+        <label>หมายเหตุ</label>
+        <textarea name="note3" id="note3" placeholder="บันทึกเพิ่มเติม..."></textarea>
+      </div>
+
+      <button type="submit" id="submitBtn">💾 บันทึกสถานะ</button>
+    </form>
+
+    <div id="resultMsg"></div>
+  </div>
+
+  <script>
+    // 💡🚨 สำคัญ: คุณต้องนำ URL Deployment ใหม่จาก Apps Script มาวางแทนที่ตรงนี้
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwutGjM8fg__QRCBYBiDsCJ8ttkQ-97v8gER_C_W7VB4TG5-vvX5doUXlbGc5bvZYM5/exec"; 
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderFromURL = urlParams.get("order");
+
+    const orderInput = document.getElementById("orderNoInput");
+    const messengerNameInput = document.getElementById("messengerName"); // ✅ อ่าน element ใหม่
+    const orderInfo = document.getElementById("orderInfo");
+    const resultMsg = document.getElementById("resultMsg");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // ✅ ถ้ามีเลขที่ใบสั่งงานจาก QR Code
+    if (orderFromURL) {
+      orderInput.value = orderFromURL;
+      orderInput.setAttribute('readonly', true);
+      orderInfo.innerHTML = `เลขที่ใบสั่งงาน: <span class="order-badge">${orderFromURL}</span>`;
+      messengerNameInput.focus(); // ให้โฟกัสที่ชื่อพนักงานแทน
+    } else {
+      orderInfo.textContent = "⚙️ กรอกเลขที่ใบสั่งงานเพื่ออัปเดตสถานะ";
+    }
+
+    // ✅ Highlight section เมื่อเลือก
+    ['result1', 'result2', 'result3'].forEach((id, index) => {
+      document.getElementById(id).addEventListener('focus', () => {
+        document.getElementById(`section${index + 1}`).classList.add('active');
+      });
+      document.getElementById(id).addEventListener('blur', () => {
+        document.getElementById(`section${index + 1}`).classList.remove('active');
+      });
+    });
+
+    function showResult(type, message) {
+      resultMsg.className = type + ' show';
+      resultMsg.textContent = message;
+
+      if (type === 'success') {
+        setTimeout(() => {
+          if (!orderFromURL) {
+            document.getElementById("updateForm").reset();
+            orderInput.focus();
+          } else {
+            // ถ้ารับค่าจาก URL ไม่ต้อง reset orderNo แต่ให้ reset ส่วนสถานะแทน
+            document.getElementById("result1").value = '';
+            document.getElementById("date1").value = '';
+            document.getElementById("note1").value = '';
+            document.getElementById("result2").value = '';
+            document.getElementById("date2").value = '';
+            document.getElementById("note2").value = '';
+            document.getElementById("result3").value = '';
+            document.getElementById("date3").value = '';
+            document.getElementById("note3").value = '';
+          }
+          resultMsg.className = '';
+        }, 3000);
+      }
+    }
+
+    document.getElementById("updateForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const orderNo = formData.get("orderNo").trim();
+      const messengerName = formData.get("messengerName").trim(); // ✅ อ่านค่าชื่อพนักงาน
+      const result1 = formData.get("result1");
+      const date1 = formData.get("date1");
+      const note1 = formData.get("note1").trim();
+      const result2 = formData.get("result2");
+      const date2 = formData.get("date2");
+      const note2 = formData.get("note2").trim();
+      const result3 = formData.get("result3");
+      const date3 = formData.get("date3");
+      const note3 = formData.get("note3").trim();
+
+      if (!orderNo) return showResult('error', '❌ กรุณากรอกเลขที่ใบสั่งงาน');
+      if (!messengerName) return showResult('error', '❌ กรุณากรอกชื่อพนักงาน'); // ✅ ตรวจสอบชื่อพนักงาน
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ กำลังบันทึก...';
+      showResult('loading', '⏳ กำลังบันทึกสถานะ...');
+
+      const payload = {
+        action: "update",
+        orderNo,
+        messengerName, // ✅ ใส่ชื่อพนักงานใน payload
+        result1: result1 || '',
+        date1: date1 || '',
+        note1: note1 || '',
+        result2: result2 || '',
+        date2: date2 || '',
+        note2: note2 || '',
+        result3: result3 || '',
+        date3: date3 || '',
+        note3: note3 || '',
+        timestamp: new Date().toLocaleString('th-TH')
+      };
+
+      try {
+        const callbackName = 'callback_' + Date.now();
+        window[callbackName] = function (response) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '💾 บันทึกสถานะ';
+
+          if (response && response.result === 'success') {
+            showResult('success', '✅ อัปเดตสถานะสำเร็จ!');
+          } else {
+            showResult('error', '❌ เกิดข้อผิดพลาด: ' + (response.message || 'ไม่สามารถอัปเดตได้'));
+          }
+
+          delete window[callbackName];
+          document.body.removeChild(script);
+        };
+
+        // ✅ ส่ง action=update และ data ไปยัง Apps Script
+        const script = document.createElement('script');
+        script.src = `${SCRIPT_URL}?callback=${callbackName}&action=update&data=${encodeURIComponent(JSON.stringify(payload))}`;
+        script.onerror = function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '💾 บันทึกสถานะ';
+          showResult('error', '❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+          delete window[callbackName];
+        };
+        document.body.appendChild(script);
+
+      } catch (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💾 บันทึกสถานะ';
+        showResult('error', '❌ เกิดข้อผิดพลาด: ' + error.message);
+      }ป
+    });
+
+    if (orderFromURL) document.getElementById('result1').focus();
+    else orderInput.focus();
+  </script>
+</body>
+
+</html>

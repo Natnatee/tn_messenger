@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TN Messenger Service - Login & Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <script type="module">
+    // นำเข้าโมดูล Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    // 🟢 นำเข้า getAnalytics
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+    // =================================================================
+    // ** 🎯 CONFIGURATION ที่ได้รับการอัปเดต (ตามที่คุณระบุ) **
+    // =================================================================
+    const firebaseConfig = {
+      // อัปเดตตามที่ผู้ใช้ร้องขอ
+      apiKey: "AIzaSyCeRhD4w2mZ2VoOxTcEXn8jL1Fa3wsGC0E", // <-- อัปเดต
+      authDomain: "tn-messenger-serviceso.firebaseapp.com", // <-- อัปเดต
+      projectId: "tn-messenger-serviceso", // <-- อัปเดต
+      storageBucket: "tn-messenger-serviceso.firebasestorage.app", // <-- อัปเดต
+      messagingSenderId: "5307950588", // <-- อัปเดต
+      appId: "1:5307950588:web:c7109253c5b19a4c72fe79", // <-- อัปเดต
+      measurementId: "G-GBDS31TT6Q" // <-- อัปเดต
+    };
+
+    // เริ่มต้น Firebase App และ Auth Service
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    // 🟢 เริ่มต้น Firebase Analytics
+    const analytics = getAnalytics(app);
+
+    // ทำให้ฟังก์ชันและตัวแปรของ Firebase ใช้งานได้ทั่วโลก
+    window.firebaseAuth = auth;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+    // 🟢 ทำให้ analytics ใช้งานได้ทั่วโลก
+    window.firebaseAnalytics = analytics;
+
+    // ฟังก์ชันช่วยในการแสดงผล
+    window.showDashboard = () => {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('dashboardWrapper').style.display = 'block';
+    }
+
+    window.showLogin = () => {
+      document.getElementById('dashboardWrapper').style.display = 'none';
+      document.getElementById('loginOverlay').style.display = 'flex';
+    }
+
+    // ตรวจสอบสถานะการเข้าสู่ระบบเมื่อโหลดหน้า (สำคัญ)
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // ถ้าผู้ใช้ล็อกอินอยู่แล้ว ให้แสดง Dashboard
+        showDashboard();
+      } else {
+        // ถ้ายังไม่ได้ล็อกอิน ให้แสดงหน้า Login
+        showLogin();
+      }
+    });
+  </script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --text: #111827;
+      --text-light: #6b7280;
+      --bg: #f3f4f6;
+      --white: #ffffff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* LOGIN OVERLAY STYLES */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      min-height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      /* ถูกควบคุมโดย JS */
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      background: var(--white);
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      border-top: 8px solid var(--primary);
+      text-align: center;
+      margin: 20px;
+    }
+
+    .login-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      margin: 0 auto 15px;
+    }
+
+    .login-container h2 {
+      font-size: 26px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .login-container p {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .login-button {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: var(--white);
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .login-button:hover {
+      background: #102e70;
+    }
+
+    /* DASHBOARD STYLES */
+    .dashboard-wrapper {
+      width: 100%;
+      padding: 30px;
+      display: none;
+      /* ถูกควบคุมโดย JS */
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .dashboard-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 20px;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary);
+      border: 3px solid var(--primary);
+      margin: 0 auto 20px;
+    }
+
+    .header h1 {
+      font-size: 34px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 16px;
+      color: var(--text-light);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .dashboard-card {
+      background: var(--white);
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      border-top: 6px solid var(--primary);
+      transition: 0.25s;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .card-icon svg {
+      stroke: white;
+      width: 32px;
+      height: 32px;
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .card-description {
+      color: var(--text-light);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .card-action {
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logout-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 8px 15px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.2s;
+    }
+
+    .logout-button:hover {
+      background: #b91c1c;
+    }
+
+    /* Message Styles (สำหรับแจ้งเตือน Login/Logout) */
+    .message-success {
+      color: #059669;
+      /* emerald-600 */
+    }
+
+    .message-error {
+      color: #ef4444;
+      /* red-500 */
+    }
+
+    @media(max-width:768px) {
+      .header h1 {
+        font-size: 28px;
+      }
+
+      .logout-button {
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-container">
+      <div class="login-logo">TN</div>
+      <h2>เข้าสู่ระบบ</h2>
+      <p>โปรดป้อนอีเมลและรหัสผ่านเพื่อเข้าถึงระบบ</p>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="email">อีเมล (Email)</label>
+          <input type="email" id="email" name="email" required placeholder="เช่น user@company.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">รหัสผ่าน (Password)</label>
+          <input type="password" id="password" name="password" required placeholder="รหัสผ่านของคุณ" />
+        </div>
+
+        <div id="loginMessage"
+          style="text-align: center; margin-bottom: 15px; font-size: 14px; font-weight: 500; min-height: 20px;"></div>
+
+        <button type="submit" class="login-button">
+          <i data-feather="log-in"></i> เข้าสู่ระบบ
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="dashboard-wrapper" id="dashboardWrapper">
+
+    <div class="header">
+      <button class="logout-button" onclick="handleLogout()">
+        <i data-feather="log-out" style="width:18px; height:18px;"></i> ออกจากระบบ
+      </button>
+      <br><br><br>
+      <h1>TN MESSENGER SERVICE</h1>
+      <p>ระบบจัดการใบสั่งงานและติดตามการจัดส่ง</p>
+    </div>
+
+    <div class="dashboard-container">
+
+      <div class="cards-grid">
+
+        <div class="dashboard-card" onclick="window.location.href='index.html'">
+          <div class="card-icon">
+            <i data-feather="file-plus"></i>
+          </div>
+          <div class="card-title">เพิ่มข้อมูลใบสั่งงาน</div>
+          <div class="card-description">สร้างใบสั่งงานใหม่ บันทึกข้อมูลลูกค้าและเอกสาร</div>
+          <div class="card-action">สร้างใบสั่งงาน <i data-feather="arrow-right"></i></div>
+        </div>
+
+        <div class="dashboard-card" onclick="window.location.href='sdknfklansdlfnaosdbgoiadotablelist.html'">
+          <div class="card-icon">
+            <i data-feather="list"></i>
+          </div>
+          <div class="card-title">ตารางใบสั่งงาน</div>
+          <div class="card-description">รายการใบสั่งงานทั้งหมด พร้อมพิมพ์และดาวน์โหลด PDF</div>
+          <div class="card-action">ดูตารางงาน <i data-feather="arrow-right"></i></div>
+        </div>
+
+        <div class="dashboard-card" onclick="window.location.href='tracking_admin.html'">
+          <div class="card-icon">
+            <i data-feather="truck"></i>
+          </div>
+          <div class="card-title">ติดตามสถานะงาน</div>
+          <div class="card-description">ตรวจสอบสถานะการจัดส่งแบบเรียลไทม์</div>
+          <div class="card-action">ติดตามงาน <i data-feather="arrow-right"></i></div>
+        </div>
+        
+        </div>
+
+    </div>
+  </div>
+
+
+  <script>
+    feather.replace();
+
+    /**
+     * ฟังก์ชันช่วยในการแสดงข้อความแจ้งเตือนในฟอร์ม Login
+     */
+    function displayLoginMessage(message, type = 'error') {
+      const messageElement = document.getElementById('loginMessage');
+      messageElement.textContent = message;
+      messageElement.className = ''; // ล้าง class เดิม
+
+      if (type === 'success') {
+        messageElement.classList.add('message-success');
+      } else {
+        messageElement.classList.add('message-error');
+      }
+
+      // ลบข้อความแจ้งเตือนออกหลังจาก 5 วินาที
+      setTimeout(() => {
+        messageElement.textContent = '';
+        messageElement.className = '';
+      }, 5000);
+    }
+
+    /**
+     * ฟังก์ชันจัดการการล็อกอิน
+     */
+    async function handleLogin(event) {
+      event.preventDefault();
+      // เคลียร์ข้อความแจ้งเตือนก่อนเริ่มการทำงาน
+      document.getElementById('loginMessage').textContent = '';
+
+      // ดึงค่าจากฟอร์ม
+      const emailInput = document.getElementById('email').value;
+      const passwordInput = document.getElementById('password').value;
+
+      try {
+        // ใช้ Firebase Sign-In
+        await window.signInWithEmailAndPassword(
+          window.firebaseAuth,
+          emailInput,
+          passwordInput
+        );
+
+        // ล็อกอินสำเร็จ (onAuthStateChanged จะจัดการการแสดงผล)
+        window.showDashboard();
+        console.log(`User logged in: ${emailInput}`);
+
+      } catch (error) {
+        const errorCode = error.code;
+        let displayMessage = 'ชื่อผู้ใช้ (อีเมล) หรือรหัสผ่านไม่ถูกต้อง';
+
+        if (errorCode === 'auth/wrong-password') {
+          displayMessage = 'รหัสผ่านไม่ถูกต้อง';
+        } else if (errorCode === 'auth/user-not-found' || errorCode === 'auth/invalid-email') {
+          displayMessage = 'ไม่พบผู้ใช้ด้วยอีเมลนี้ หรืออีเมลไม่ถูกต้อง';
+        } else if (errorCode === 'auth/missing-password') {
+          displayMessage = 'กรุณาใส่รหัสผ่าน';
+        }
+
+        console.error("Login Error:", errorCode, error.message);
+        // แสดงข้อความแจ้งเตือนความผิดพลาด
+        displayLoginMessage(displayMessage, 'error');
+      }
+    }
+
+    /**
+     * ฟังก์ชันจัดการ Log Out
+     */
+    function handleLogout() {
+      window.signOut(window.firebaseAuth).then(() => {
+        // Log Out สำเร็จ (onAuthStateChanged จะเรียก showLogin() เพื่อเปลี่ยนหน้าไป Login)
+
+        // แสดงข้อความแจ้งเตือนความสำเร็จที่หน้า Login โดยหน่วงเวลาเล็กน้อย
+        setTimeout(() => {
+          displayLoginMessage('ออกจากระบบสำเร็จ', 'success');
+        }, 50);
+
+        // เคลียร์ค่าในฟอร์ม
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+
+      }).catch((error) => {
+        console.error("Logout Error:", error);
+        displayLoginMessage('เกิดข้อผิดพลาดในการออกจากระบบ', 'error');
+      });
+    }
+  </script>
+
+</body>
+
+</html>
