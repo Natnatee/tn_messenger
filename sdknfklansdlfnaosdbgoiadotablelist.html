@@ -35,10 +35,12 @@
         justify-content: center;
         align-items: flex-start;
         /* เปลี่ยนเป็น flex-start ให้เนื้อหาชิดบนเล็กน้อย */
-        min-height: 100vh;
-        /* ใช้ min-height */
+        height: 100vh;
+        /* กำหนดความสูงแน่นอน */
         box-sizing: border-box;
         padding: 30px;
+        overflow: hidden;
+        /* ป้องกัน body scroll */
       }
 
       /* 🎨 ปรับสีและขนาดใน Flatpickr ให้เข้ากับธีมสีน้ำเงิน */
@@ -87,8 +89,10 @@
         flex-direction: column;
         padding: 24px 30px;
         box-sizing: border-box;
-        min-height: 80vh;
-        /* เพื่อให้ดูดีขึ้น */
+        height: calc(100vh - 60px);
+        /* ความสูงเต็มหน้าจอ ลบ padding body */
+        max-height: calc(100vh - 60px);
+        overflow: hidden;
       }
 
       /* 🛠️ ปรับ: Header-bar ให้มีช่องว่างระหว่างหัวข้อและส่วนควบคุม (ชิดขวาถาวร) */
@@ -104,12 +108,14 @@
       /* 💡 [สำคัญ] ปรับ: wrapper สำหรับจัดกลุ่มตัวกรองและปุ่มทางด้านขวา */
       .controls-wrapper {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
-        align-items: flex-end;
+        align-items: center;
         /* 👈 จัดองค์ประกอบทั้งหมด (search, filter, buttons) ให้อยู่ชิดขวา */
         flex-grow: 1;
         /* ให้ใช้พื้นที่ที่เหลือทั้งหมด เพื่อผลักหัวข้อไปซ้ายสุด */
+        flex-wrap: wrap;
+        justify-content: flex-end;
       }
 
       .header-bar h1 {
@@ -181,7 +187,6 @@
         flex-wrap: wrap;
         justify-content: flex-end;
         /* 👈 จัดกลุ่มไปทางขวา */
-        width: 100%;
       }
 
       .search-box {
@@ -297,10 +302,15 @@
 
       .table-wrapper {
         flex: 1;
-        overflow: auto;
-        /* 🛠้ ปรับขอบตาม index.html */
+        overflow-x: auto;
+        /* scroll แนวนอนถ้าตารางกว้างเกิน */
+        overflow-y: auto;
+        /* scroll แนวตั้งเสมอ */
+        /* 🛠️ ปรับขอบตาม index.html */
         border: 1px solid var(--border);
         border-radius: 10px;
+        max-height: 100%;
+        /* จำกัดความสูงไม่ให้เกิน parent */
       }
 
       table {
@@ -374,10 +384,10 @@
         align-items: center;
         gap: 6px;
 
-        /* 🛠้ เปลี่ยนสีปุ่มกลับเป็นสีหลัก */
+        /* 🛠️ เปลี่ยนสีปุ่มกลับเป็นสีหลัก */
         background: var(--primary);
         color: var(--white);
-        padding: 6px 14px;
+        padding: 10px 16px;
         /* ปรับ padding/radius ตาม index.html */
         border-radius: 8px;
         font-size: 14px;
@@ -386,7 +396,8 @@
 
         width: fit-content;
         white-space: nowrap;
-        margin-bottom: 15px;
+        height: 44px;
+        box-sizing: border-box;
 
         transition: 0.2s;
       }
@@ -400,13 +411,34 @@
 
   <body>
     <div class="excel-box">
-      <a href="dashboard.html" class="btn-back-top">⬅ กลับหน้า Dashboard</a>
+      <div
+        class="header-bar"
+        style="display: flex; align-items: center; gap: 16px"
+      >
+        <a
+          href="dashboard.html"
+          class="btn-back-top"
+          style="text-decoration: none; font-weight: 600"
+        >
+          ⬅ กลับหน้า Dashboard
+        </a>
 
-      <div class="header-bar">
-        <h1>📋 ตารางใบสั่งงาน (TN MESSENGER SERVICE)</h1>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <button
+            id="btnDownloadAll"
+            class="btn-download-all"
+            onclick="downloadAllPDF()"
+          >
+            📥 ดาวน์โหลดทั้งหมด (PDF)
+          </button>
+
+          <a href="./index.html" class="link"> ＋ เพิ่มรายการใหม่ </a>
+        </div>
 
         <div class="controls-wrapper">
           <div class="search-filter-box">
+            <h1>📋 ตารางใบสั่งงาน (TN MESSENGER SERVICE)</h1>
+
             <div class="date-filter-group">
               <label>📅 วันที่เก็บเอกสาร (วัน/เดือน/พ.ศ.):</label>
               <div class="date-input-wrapper">
@@ -417,7 +449,6 @@
                 />
                 <button
                   id="clearDateFilterBtn"
-                  class="btn-clear-date-inside"
                   title="ล้างวันที่กรอง"
                   style="display: none"
                   onclick="clearDateFilter()"
@@ -426,6 +457,7 @@
                 </button>
               </div>
             </div>
+
             <div class="search-box">
               <input
                 type="text"
@@ -433,19 +465,8 @@
                 placeholder="🔍 ค้นหา..."
                 onkeyup="filterTable()"
               />
-              <span class="count-label" id="countLabel"></span>
+              <span id="countLabel"></span>
             </div>
-          </div>
-
-          <div style="display: flex; gap: 10px">
-            <button
-              id="btnDownloadAll"
-              class="btn-download-all"
-              onclick="downloadAllPDF()"
-            >
-              📥 ดาวน์โหลดทั้งหมด (PDF)
-            </button>
-            <a href="./index.html" class="link">＋ เพิ่มรายการใหม่</a>
           </div>
         </div>
       </div>
