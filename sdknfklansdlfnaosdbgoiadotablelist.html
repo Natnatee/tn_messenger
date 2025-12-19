@@ -335,6 +335,43 @@
         /* 🛠้ เปลี่ยนสีขอบ Header */
         border: 1px solid var(--primary-light);
         white-space: nowrap;
+        /* 👆 ทำให้เป็นปุ่ม */
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s ease;
+      }
+
+      thead th:hover {
+        background: var(--primary-light);
+        transform: scale(1.02);
+      }
+
+      /* 📌 คอลัมน์ที่ถูก pin */
+      thead th.pinned {
+        background: #3b82f6 !important; /* สีฟ้า */
+        position: sticky;
+        z-index: 3;
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.15);
+      }
+
+      thead th.pinned::after {
+        content: " 📌";
+        font-size: 12px;
+      }
+
+      tbody td.pinned {
+        position: sticky;
+        z-index: 1;
+        background-color: #dbeafe !important; /* สีฟ้าอ่อน */
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+      }
+
+      tbody tr:nth-child(even) td.pinned {
+        background: #bfdbfe !important;
+      }
+
+      tbody tr:hover td.pinned {
+        background: #93c5fd !important;
       }
 
       tbody td {
@@ -630,13 +667,17 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
           // สร้างหัวตารางจาก key ของ object แรก
           const keys = Object.keys(allRows[0]);
           theadRow.innerHTML = "";
-          keys.forEach((h) => {
+          keys.forEach((h, index) => {
             const th = document.createElement("th");
             th.textContent = h;
+            th.dataset.columnIndex = index;
+            th.addEventListener("click", () => togglePinColumn(index));
             theadRow.appendChild(th);
           });
           const thPrint = document.createElement("th");
           thPrint.textContent = "พิมพ์";
+          thPrint.dataset.columnIndex = keys.length;
+          thPrint.addEventListener("click", () => togglePinColumn(keys.length));
           theadRow.appendChild(thPrint);
           // แสดงข้อมูลครั้งแรก
           filterTable();
@@ -693,6 +734,7 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
             Object.values(r).forEach((c, index) => {
               const td = document.createElement("td");
               td.textContent = c || "-";
+              td.dataset.columnIndex = index;
               tr.appendChild(td);
             });
             const tdPrint = document.createElement("td");
@@ -700,12 +742,73 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
             btn.className = "btn-print";
             btn.textContent = "🖨️ ดาวน์โหลด PDF";
             btn.onclick = () => generateOrderPDF(r);
+            tdPrint.dataset.columnIndex = Object.keys(r).length;
             tdPrint.appendChild(btn);
             tr.appendChild(tdPrint);
             tbody.appendChild(tr);
           });
         }
         countLabel.textContent = `(รวม ${filteredRows.length} รายการ)`;
+
+        // 📌 อัปเดตคอลัมน์ที่ถูก pin
+        updatePinnedColumns();
+      }
+
+      // 📌 ตัวแปรเก็บสถานะคอลัมน์ที่ถูก pin
+      const pinnedColumns = new Set();
+
+      // 📌 ฟังก์ชัน toggle pin/unpin คอลัมน์
+      function togglePinColumn(columnIndex) {
+        if (pinnedColumns.has(columnIndex)) {
+          pinnedColumns.delete(columnIndex);
+        } else {
+          pinnedColumns.add(columnIndex);
+        }
+        updatePinnedColumns();
+      }
+
+      // 📌 ฟังก์ชันอัปเดตการแสดงผลคอลัมน์ที่ถูก pin
+      function updatePinnedColumns() {
+        const theadRow = document.getElementById("tableHeadRow");
+        const tbody = document.getElementById("tableBody");
+
+        // ลบ class pinned ทั้งหมดก่อน
+        theadRow.querySelectorAll("th").forEach((th) => {
+          th.classList.remove("pinned");
+          th.style.left = "";
+        });
+        tbody.querySelectorAll("td").forEach((td) => {
+          td.classList.remove("pinned");
+          td.style.left = "";
+        });
+
+        // เรียง pinnedColumns ตาม index
+        const sortedPinned = Array.from(pinnedColumns).sort((a, b) => a - b);
+
+        // คำนวณ left position สำหรับแต่ละคอลัมน์ที่ถูก pin
+        let cumulativeLeft = 0;
+        sortedPinned.forEach((colIndex) => {
+          // หา th ที่ตรงกับ columnIndex
+          const th = theadRow.querySelector(
+            `th[data-column-index="${colIndex}"]`
+          );
+          if (th) {
+            th.classList.add("pinned");
+            th.style.left = `${cumulativeLeft}px`;
+
+            // หา td ทั้งหมดในคอลัมน์นี้
+            const tds = tbody.querySelectorAll(
+              `td[data-column-index="${colIndex}"]`
+            );
+            tds.forEach((td) => {
+              td.classList.add("pinned");
+              td.style.left = `${cumulativeLeft}px`;
+            });
+
+            // เพิ่มความกว้างของคอลัมน์นี้
+            cumulativeLeft += th.offsetWidth;
+          }
+        });
       }
 
       /****************************************************
