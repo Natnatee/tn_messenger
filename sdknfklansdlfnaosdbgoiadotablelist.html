@@ -667,7 +667,7 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
             // แปลง selectedDateFilter จาก "YYYY-MM-DD" เป็น "DD/MM/YYYY"
             const [year, month, day] = selectedDateFilter.split("-");
             const formattedDate = `${day}/${month}/${year}`;
-            
+
             console.log("🔍 เปรียบเทียบ:", rawDate, "กับ", formattedDate);
             dateMatch = rawDate === formattedDate;
           }
