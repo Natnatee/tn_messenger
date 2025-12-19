@@ -1095,8 +1095,8 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
           // 1. สร้าง QR Codes ทั้งหมดและจัดเก็บ Data URL
           const qrDataURLs = [];
           for (const row of rowsToDownload) {
-            // 💡 [ใช้ Index 16] ดึงเลขที่ใบสั่งงาน (คอลัมน์ Q)
-            const orderNo = clean(row[16]);
+            // ✅ ใช้ key จาก JSON Object
+            const orderNo = clean(row["เลขที่ใบสั่งงาน"]);
             const updateURL = `${window.location.origin}/update-status.html?order=${orderNo}`;
             const qrDataURL = await generateQRCodeImage(updateURL);
             qrDataURLs.push(qrDataURL);
@@ -1106,36 +1106,38 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
           rowsToDownload.forEach((row, index) => {
             if (index > 0) doc.addPage();
 
-            // 💡 [ใช้ Index 16] ดึงเลขที่ใบสั่งงาน (คอลัมน์ Q)
-            const orderNo = clean(row[16]).padStart(4, "0");
-            const dateTime = formatThaiDateTime(clean(row[0]));
+            // ✅ ใช้ key จาก JSON Object
+            const orderNo = clean(row["เลขที่ใบสั่งงาน"]).padStart(4, "0");
+            const dateTime = formatThaiDateTime(clean(row["ประทับเวลา"]));
             const qrDataURL = qrDataURLs[index];
-            const collectDate = formatToThaiDateOnly(clean(row[1]));
+            const collectDate = formatToThaiDateOnly(
+              clean(row["วันที่เก็บเอกสาร"])
+            );
 
             const fullData = {
               orderNo: orderNo,
               dateTime: dateTime,
-              team: clean(row[3]),
-              requester: clean(row[4]),
-              requesterPhone: clean(row[5]),
-              email: clean(row[15]), // 🟢 Index 15: e-mail
-              project: clean(row[2]),
+              team: clean(row["(ทีม)"]),
+              requester: clean(row["ผู้สั่งงาน"]),
+              requesterPhone: clean(row["เบอร์โทรศัพท์"]),
+              email: clean(row["e-mail"]),
+              project: clean(row["โครงการ"]),
               collectDate: collectDate,
-              customerName: clean(row[6]),
-              customerPhone: clean(row[8]),
-              addrStreet: clean(row[9]),
-              subdistrict: clean(row[10]),
-              district: clean(row[11]),
-              province: clean(row[12]).split("/")[0].trim(),
-              zipcode: clean(row[12]).split("/")[1]
-                ? clean(row[12]).split("/")[1].trim()
+              customerName: clean(row["ลูกค้า"]),
+              customerPhone: clean(row["เบอร์โทรศัพท์ลูกค้า"]),
+              addrStreet: clean(row["ที่อยู่รับเอกสาร เลขที่ ถนน"]),
+              subdistrict: clean(row["แขวง/ตำบล"]),
+              district: clean(row["เขต/อำเภอ"]),
+              province: clean(row["จังหวัด/รหัสไปรษณีย์"]).split("/")[0].trim(),
+              zipcode: clean(row["จังหวัด/รหัสไปรษณีย์"]).split("/")[1]
+                ? clean(row["จังหวัด/รหัสไปรษณีย์"]).split("/")[1].trim()
                 : "",
-              // 🟢 Index 13: เอกสารที่ต้องจัดเก็บทั้งหมด (คอลัมน์ N)
-              documents: clean(row[13])
+              // เอกสารที่ต้องจัดเก็บทั้งหมด
+              documents: clean(row["เอกสารที่ต้องจัดเก็บทั้งหมด"])
                 .split("|") // แยกด้วยเครื่องหมาย |
                 .map((d) => d.trim()) // ลบช่องว่าง
                 .filter((d) => d !== "-" && d !== "" && d !== " "), // กรองค่าว่าง
-              note: clean(row[14]), // 🟢 Index 14: หมายเหตุ (คอลัมน์ O)
+              note: clean(row["หมายเหตุ"]),
             };
 
             const topY = 15;
