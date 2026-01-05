@@ -666,7 +666,7 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
             tbody.innerHTML = `<tr><td colspan="20" style="text-align:center; color:#6b7280;">🔭 ไม่มีข้อมูล</td></tr>`;
             return;
           }
-          allRows = json.data;
+          allRows = json.data.slice().reverse();
           console.log("📦 ข้อมูลที่ได้จาก API:", allRows[0]); // ดูตัวอย่างแถวแรก
           // สร้างหัวตารางจาก key ของ object แรก
           const keys = Object.keys(allRows[0]);
