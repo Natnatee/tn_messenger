@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TN Messenger Service - ลงทะเบียนพนักงาน</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <!-- Flatpickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --text: #111827;
+      --text-light: #6b7280;
+      --bg: #f3f4f6;
+      --white: #ffffff;
+      --border: #d1d5db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .register-container {
+      max-width: 480px;
+      width: 100%;
+      background: #fff;
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      border-top: 8px solid var(--primary);
+      text-align: center;
+    }
+
+    .register-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 15px;
+      border-radius: 18px;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    h2 {
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-family: 'Prompt', sans-serif;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(12px);
+      cursor: pointer;
+      color: var(--text-light);
+    }
+
+    .register-button {
+      width: 100%;
+      padding: 14px;
+      background: #059669;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .register-button:hover {
+      background: #047857;
+    }
+
+    .redirect-link {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-top: 20px;
+    }
+
+    .redirect-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .redirect-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="register-container">
+    <div class="register-logo">TN</div>
+    <h2>ลงทะเบียนพนักงาน</h2>
+    <p>กรอกข้อมูลเพื่อสร้างบัญชีพนักงานใหม่</p>
+
+    <form onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="email" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password *</label>
+        <input type="password" id="password" minlength="6" required>
+        <i data-feather="eye-off" class="toggle-password" onclick="togglePassword()"></i>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>ชื่อ *</label>
+          <input type="text" id="firstName" required>
+        </div>
+        <div class="form-group">
+          <label>นามสกุล *</label>
+          <input type="text" id="lastName" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>วันเกิด (ค.ศ.) *</label>
+        <input type="text" id="birthDate" placeholder="DD/MM/YYYY" readonly>
+      </div>
+
+      <div id="registerMessage" style="min-height:20px"></div>
+
+      <button class="register-button">
+        <i data-feather="user-plus"></i> สมัครสมาชิก
+      </button>
+    </form>
+
+    <div class="redirect-link">
+      มีบัญชีอยู่แล้ว? <a href="login_employee.html">เข้าสู่ระบบ</a>
+    </div>
+  </div>
+
+  <script>
+    feather.replace();
+
+    function formatISODateLocal(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    }
+
+    function togglePassword() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      feather.replace();
+    }
+
+    const birthDateInput = document.getElementById('birthDate');
+    
+    // ตั้งค่าเริ่มต้นลงใน attribute ด้วย
+    const defaultDateStr = "1997-01-01";
+    birthDateInput.setAttribute("data-iso-date", defaultDateStr);
+
+    flatpickr(birthDateInput, {
+      locale: "th",
+      dateFormat: "d/m/Y",
+      defaultDate: defaultDateStr,
+      onChange: (dates) => {
+        if (dates.length) {
+          const d = dates[0];
+          birthDateInput.setAttribute(
+            "data-iso-date",
+            formatISODateLocal(d)
+          );
+        }
+      }
+    });
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button');
+      const messageDiv = document.getElementById("registerMessage");
+      
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const firstNameInput = document.getElementById('firstName');
+      const lastNameInput = document.getElementById('lastName');
+      const birthDateInput = document.getElementById('birthDate');
+      
+      // แสดงสถานะกำลังโหลด
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.7';
+      submitBtn.style.cursor = 'not-allowed';
+      const originalBtnContent = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i data-feather="loader" class="spin"></i> กำลังส่งข้อมูล...';
+      feather.replace();
+      
+      const data = {
+        username: firstNameInput.value,
+        email: emailInput.value,
+        last_name: lastNameInput.value,
+        password: passwordInput.value,
+        birth_day: birthDateInput.getAttribute("data-iso-date")
+      };
+
+      const url = "https://script.google.com/macros/s/AKfycbwutGjM8fg__QRCBYBiDsCJ8ttkQ-97v8gER_C_W7VB4TG5-vvX5doUXlbGc5bvZYM5/exec?action=register_employee";
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const resultData = await response.json();
+        console.log("REGISTER RESPONSE:", resultData);
+
+        if (resultData.result === "error") {
+          throw new Error(resultData.message || "เกิดข้อผิดพลาดจากระบบ");
+        }
+
+        messageDiv.textContent = "✅ ลงทะเบียนสำเร็จเรียบร้อย!";
+        messageDiv.className = "message-success";
+        
+        // เคลียร์ฟอร์ม
+        e.target.reset();
+        birthDateInput.setAttribute("data-iso-date", defaultDateStr); // รีเซ็ตเป็นค่าเริ่มต้น
+        
+      } catch (error) {
+        console.error("REGISTER ERROR:", error);
+        messageDiv.textContent = "❌ " + (error.message || "เกิดข้อผิดพลาดในการเชื่อมต่อ");
+        messageDiv.className = "message-error";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.innerHTML = originalBtnContent;
+        feather.replace();
+      }
+    }
+  </script>
+
+</body>
+
+</html>
