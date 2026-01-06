@@ -23,7 +23,6 @@ export default defineConfig({
         tablelist: "sdknfklansdlfnaosdbgoiadotablelist.html",
         home: "home.html",
         scan: "scan.html",
-        list: "list.html",
         login_employee: "login_employee.html",
         register_employee: "register_employee.html",
       },
