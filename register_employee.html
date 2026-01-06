@@ -188,6 +188,11 @@
       </div>
 
       <div class="form-group">
+        <label>ชื่อเล่น *</label>
+        <input type="text" id="nickname" required>
+      </div>
+
+      <div class="form-group">
         <label>วันเกิด (ค.ศ.) *</label>
         <input type="text" id="birthDate" placeholder="DD/MM/YYYY" readonly>
       </div>
@@ -205,6 +210,11 @@
   </div>
 
   <script>
+    // ตรวจสอบ Token ถ้ามีให้ไปหน้า Home ทันที
+    if (localStorage.getItem("tn_employee_token")) {
+      window.location.href = 'home.html';
+    }
+
     feather.replace();
 
     function formatISODateLocal(date) {
@@ -250,6 +260,7 @@
       const passwordInput = document.getElementById('password');
       const firstNameInput = document.getElementById('firstName');
       const lastNameInput = document.getElementById('lastName');
+      const nicknameInput = document.getElementById('nickname');
       const birthDateInput = document.getElementById('birthDate');
       
       // แสดงสถานะกำลังโหลด
@@ -264,6 +275,7 @@
         username: firstNameInput.value,
         email: emailInput.value,
         last_name: lastNameInput.value,
+        nickname: nicknameInput.value,
         password: passwordInput.value,
         birth_day: birthDateInput.getAttribute("data-iso-date")
       };

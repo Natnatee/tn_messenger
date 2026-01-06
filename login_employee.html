@@ -195,6 +195,11 @@
   </div>
 
   <script>
+    // ตรวจสอบ Token ถ้ามีให้ไปหน้า Home ทันที
+    if (localStorage.getItem("tn_employee_token")) {
+      window.location.href = 'home.html';
+    }
+
     feather.replace();
 
     function togglePassword() {
@@ -249,9 +254,9 @@
         messageDiv.textContent = "✅ เข้าสู่ระบบสำเร็จ!";
         messageDiv.className = "message-success";
         
-        // ตัวอย่าง: ถ้าสำเร็จให้โหลดหน้าใหม่หรือไปหน้า Dashboard
+        // ไปหน้า Home
         setTimeout(() => {
-          // window.location.href = 'dashboard_employee.html'; // ถ้ามีหน้าแดชบอร์ด
+           window.location.href = 'home.html';
         }, 1500);
 
       } catch (error) {

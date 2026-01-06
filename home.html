@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TN Messenger Service - หน้าแรก</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --text: #111827;
+      --text-light: #6b7280;
+      --bg: #f3f4f6;
+      --white: #ffffff;
+      --border: #d1d5db;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .home-container {
+      max-width: 480px;
+      width: 100%;
+      background: #fff;
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      border-top: 8px solid var(--primary);
+      text-align: center;
+    }
+
+    .user-avatar {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 20px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);
+    }
+
+    h2 {
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+
+    .welcome-text {
+      font-size: 16px;
+      color: var(--text-light);
+      margin-bottom: 30px;
+    }
+
+    .info-card {
+      text-align: left;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    .info-value {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--primary);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    .nav-item.active {
+      color: white;
+    }
+
+    .nav-item i {
+      margin-bottom: 4px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav-item:hover {
+      color: white;
+    }
+
+    /* Adjust main padding for bottom nav */
+    body {
+      padding-bottom: 80px;
+    }
+
+    /* Loading state */
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+  </style>
+
+  <script>
+    // Protect Route: ตรวจสอบ Token ทันที
+    const token = localStorage.getItem("tn_employee_token");
+    const userDataStr = localStorage.getItem("tn_employee_user");
+    
+    if (!token || !userDataStr) {
+      window.location.href = 'login_employee.html';
+    }
+  </script>
+</head>
+
+<body>
+  <div id="loading-overlay">
+    <div style="text-align: center;">
+      <i data-feather="loader" style="width: 48px; height: 48px; color: var(--primary); animation: spin 1s linear infinite;"></i>
+    </div>
+  </div>
+
+  <div class="home-container">
+    <div class="user-avatar" id="avatarText">U</div>
+    <h2 id="displayName">ยินดีต้อนรับ</h2>
+    <p class="welcome-text">ข้อมูลพนักงานของคุณในระบบ</p>
+
+    <div class="info-card">
+      <div class="info-item">
+        <span class="info-label">ID พนักงาน:</span>
+        <span class="info-value" id="userId">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">ชื่อผู้ใช้:</span>
+        <span class="info-value" id="userName">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">ชื่อเล่น:</span>
+        <span class="info-value" id="userNickname">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">ชื่อ:</span>
+        <span class="info-value" id="userFirstName">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">นามสกุล:</span>
+        <span class="info-value" id="userLastName">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">อีเมล:</span>
+        <span class="info-value" id="userEmail">-</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item active">
+      <i data-feather="home"></i>
+      <span>หน้าหลัก</span>
+    </a>
+    <a href="scan.html" class="nav-item">
+      <i data-feather="maximize"></i>
+      <span>สแกน</span>
+    </a>
+    <a href="list.html" class="nav-item">
+      <i data-feather="list"></i>
+      <span>รายการ</span>
+    </a>
+    <button onclick="handleLogout()" class="nav-item" style="color: #fda4af;">
+      <i data-feather="log-out"></i>
+      <span>ออกจากระบบ</span>
+    </button>
+  </nav>
+
+  <script>
+    feather.replace();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const userData = JSON.parse(localStorage.getItem("tn_employee_user"));
+      
+      if (userData) {
+        // แสดงข้อมูลในหน้าเว็บ
+        document.getElementById('userId').textContent = userData.id || '-';
+        document.getElementById('userName').textContent = userData.username || '-';
+        document.getElementById('userFirstName').textContent = userData.username || '-'; // username ในที่นี้คือชื่อจริงที่ส่งไปตอนสมัคร
+        document.getElementById('userLastName').textContent = userData.last_name || '-';
+        document.getElementById('userEmail').textContent = userData.email || '-';
+        document.getElementById('userNickname').textContent = userData.nickname || '-';
+        
+        // ปรับแต่ง UI เล็กน้อย
+        document.getElementById('displayName').textContent = `คุณ${userData.nickname || userData.username}`;
+        document.getElementById('avatarText').textContent = (userData.nickname || userData.username).charAt(0).toUpperCase();
+      }
+
+      // ซ่อน loading ครู่หนึ่งเพื่อให้ดูเนียน
+      setTimeout(() => {
+        document.getElementById('loading-overlay').style.display = 'none';
+      }, 500);
+    });
+
+    function handleLogout() {
+      if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
+        localStorage.removeItem("tn_employee_token");
+        localStorage.removeItem("tn_employee_user");
+        window.location.href = 'login_employee.html';
+      }
+    }
+  </script>
+
+  <style>
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</body>
+
+</html>
