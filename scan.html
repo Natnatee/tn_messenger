@@ -324,7 +324,7 @@
             const btnHtml = `<a href="${updateUrl}" class="order-link-btn">อัปเดตงาน</a>`;
 
             // แทรกปุ่มต่อท้าย resultSpan ถ้ายังไม่มี
-            resultContainer.innerHTML = `<strong>สแกนสำเร็จ:</strong> <span id="scan-result">Order: <strong>${orderId}</strong></span> ${btnHtml}`;
+            resultContainer.innerHTML = `<span id="scan-result">Order: <strong>${orderId}</strong></span> ${btnHtml}`;
             resultContainer.style.display = "flex";
 
             // สั่นเบาๆ (ถ้าอุปกรณ์รองรับ)
