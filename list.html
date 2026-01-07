@@ -116,15 +116,19 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: #e5e7eb;
+        background: #e5e7eb; /* เทา: ว่าง */
       }
 
-      .dot.active {
-        background: var(--success);
+      .dot.success {
+        background: var(--success); /* เขียว: สำเร็จ */
       }
 
-      .dot.inactive {
-        background: var(--error);
+      .dot.cancel {
+        background: var(--error); /* แดง: ลูกค้าขอยกเลิก */
+      }
+
+      .dot.pending {
+        background: var(--warning); /* เหลือง: มีข้อมูลอื่นๆ */
       }
 
       .info-row {
@@ -452,24 +456,31 @@
           const card = document.createElement("div");
           card.className = "task-card";
 
-          // เช็คสถานะวงกลม 3 อัน
-          const status1 = !!task["ผลการวิ่งงาน 1: สถานะ"];
-          const status2 = !!task["ผลการวิ่งงาน 2: สถานะ"];
-          const status3 = !!task["ผลการวิ่งงาน 3: สถานะ"];
+          // ฟังก์ชันช่วยกำหนดคลาสสีของจุด
+          const getDotClass = (status) => {
+            if (!status) return ""; // สีเทา (ค่าเริ่มต้น)
+            if (status === "สำเร็จ") return "success"; // สีเขียว
+            if (status === "ลูกค้าขอยกเลิก") return "cancel"; // สีแดง
+            return "pending"; // สีเหลือง (มีข้อมูลอื่นๆ)
+          };
+
+          const dot1 = getDotClass(task["ผลการวิ่งงาน 1: สถานะ"]);
+          const dot2 = getDotClass(task["ผลการวิ่งงาน 2: สถานะ"]);
+          const dot3 = getDotClass(task["ผลการวิ่งงาน 3: สถานะ"]);
 
           card.innerHTML = `
             <div class="task-header">
               <span class="order-no">#${task["เลขที่ใบสั่งงาน"]}</span>
               <div class="status-dots">
-                <div class="dot ${
-                  status1 ? "active" : "inactive"
-                }" title="งาน 1"></div>
-                <div class="dot ${
-                  status2 ? "active" : "inactive"
-                }" title="งาน 2"></div>
-                <div class="dot ${
-                  status3 ? "active" : "inactive"
-                }" title="งาน 3"></div>
+                <div class="dot ${dot1}" title="งาน 1: ${
+            task["ผลการวิ่งงาน 1: สถานะ"] || "ว่าง"
+          }"></div>
+                <div class="dot ${dot2}" title="งาน 2: ${
+            task["ผลการวิ่งงาน 2: สถานะ"] || "ว่าง"
+          }"></div>
+                <div class="dot ${dot3}" title="งาน 3: ${
+            task["ผลการวิ่งงาน 3: สถานะ"] || "ว่าง"
+          }"></div>
               </div>
             </div>
             

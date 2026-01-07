@@ -16,8 +16,8 @@
         font-family: "Prompt", sans-serif;
         background: #f3f4f6;
         margin: 0;
-        padding: 20px;
-        padding-bottom: 100px;
+        padding: 10px;
+        padding-bottom: 80px;
         display: flex;
         justify-content: center;
         align-items: flex-start;
@@ -28,15 +28,15 @@
         width: 100%;
         max-width: 540px;
         background: #fff;
-        padding: 25px 30px;
+        padding: 15px 20px;
         border-radius: 16px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         box-sizing: border-box;
       }
 
       h1 {
-        font-size: 22px;
-        margin-bottom: 15px;
+        font-size: 20px;
+        margin-bottom: 10px;
         text-align: center;
         color: #1f2937;
       }
@@ -44,17 +44,17 @@
       #orderInfo {
         text-align: center;
         color: #6b7280;
-        margin-bottom: 20px;
-        font-size: 14px;
+        margin-bottom: 15px;
+        font-size: 13px;
       }
 
       .order-badge {
         display: inline-block;
         background: #dbeafe;
         color: #1e40af;
-        padding: 8px 16px;
+        padding: 5px 12px;
         border-radius: 8px;
-        margin-top: 10px;
+        margin-top: 5px;
         font-weight: 500;
       }
 
@@ -62,14 +62,15 @@
         background: #f9fafb;
         border: 2px solid #e5e7eb;
         border-radius: 12px;
-        padding: 18px;
-        margin-bottom: 18px;
+        padding: 12px;
+        margin-bottom: 12px;
+        display: none; /* ซ่อนไว้ก่อนทุกลำดับ */
       }
 
       .result-section h3 {
-        margin: 0 0 15px 0;
+        margin: 0 0 10px 0;
         color: #374151;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
         display: flex;
         align-items: center;
@@ -83,28 +84,28 @@
 
       label {
         display: block;
-        margin: 12px 0 6px;
+        margin: 8px 0 4px;
         font-weight: 500;
         color: #374151;
-        font-size: 14px;
+        font-size: 13px;
       }
 
       select,
       input,
       textarea {
         width: 100%;
-        padding: 11px;
+        padding: 8px 11px;
         border: 1px solid #d1d5db;
         border-radius: 10px;
         font-family: inherit;
-        font-size: 15px;
+        font-size: 14px;
         box-sizing: border-box;
         transition: all 0.2s ease;
       }
 
       textarea {
         resize: vertical;
-        min-height: 70px;
+        min-height: 60px;
       }
 
       select:focus,
@@ -121,15 +122,15 @@
       }
 
       #submitBtn {
-        margin-top: 20px;
-        padding: 14px 20px;
+        margin-top: 10px;
+        padding: 12px 20px;
         border: none;
         background: #2563eb;
         color: white;
         border-radius: 10px;
         cursor: pointer;
         width: 100%;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
         transition: all 0.25s ease;
       }
@@ -171,6 +172,55 @@
       #resultMsg.loading {
         background: #dbeafe;
         color: #1e40af;
+      }
+
+      .summary-card {
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .summary-card.success {
+        display: block;
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+      }
+
+      .summary-card.error {
+        display: block;
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #f87171;
+      }
+
+      .summary-card i {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 10px;
+      }
+
+      .summary-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .summary-detail {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      #fetch-loading {
+        text-align: center;
+        padding: 20px;
+        display: none;
+      }
+
+      .result-section {
+        display: none; /* ซ่อนไว้ก่อนทุกลำดับ */
       }
 
       @media (max-width: 480px) {
@@ -232,9 +282,16 @@
   <body>
     <div class="box">
       <h1>📦 อัปเดตสถานะใบสั่งงาน</h1>
-      <p id="orderInfo">กรอกเลขที่ใบสั่งงาน หรือตรวจจากลิงก์ QR</p>
 
-      <form id="updateForm">
+      <!-- UI สรุปผล -->
+      <div id="summary-container"></div>
+
+      <div id="fetch-loading">
+        <i data-feather="loader" class="spin" style="color: #2563eb"></i>
+        <p>กำลังดึงข้อมูลงาน...</p>
+      </div>
+
+      <form id="updateForm" style="display: none">
         <label>เลขที่ใบสั่งงาน</label>
         <input
           type="text"
@@ -268,8 +325,6 @@
             <option>ลูกค้าขอยกเลิก</option>
             <option>ใบหน้างานซ้ำ</option>
           </select>
-          <label>วัน/เดือน/ปี</label>
-          <input type="date" name="date1" id="date1" />
           <label>หมายเหตุ</label>
           <textarea
             name="note1"
@@ -290,8 +345,6 @@
             <option>ลูกค้าขอยกเลิก</option>
             <option>ใบหน้างานซ้ำ</option>
           </select>
-          <label>วัน/เดือน/ปี</label>
-          <input type="date" name="date2" id="date2" />
           <label>หมายเหตุ</label>
           <textarea
             name="note2"
@@ -312,8 +365,6 @@
             <option>ลูกค้าขอยกเลิก</option>
             <option>ใบหน้างานซ้ำ</option>
           </select>
-          <label>วัน/เดือน/ปี</label>
-          <input type="date" name="date3" id="date3" />
           <label>หมายเหตุ</label>
           <textarea
             name="note3"
@@ -374,10 +425,106 @@
       if (orderFromURL) {
         orderInput.value = orderFromURL;
         orderInput.setAttribute("readonly", true);
-        orderInfo.innerHTML = `เลขที่ใบสั่งงาน: <span class="order-badge">${orderFromURL}</span>`;
-        messengerNameInput.focus(); // ให้โฟกัสที่ชื่อพนักงานแทน
+        fetchTaskData(orderFromURL); // ดึงข้อมูลทันที
       } else {
         orderInfo.textContent = "⚙️ กรอกเลขที่ใบสั่งงานเพื่ออัปเดตสถานะ";
+        document.getElementById("updateForm").style.display = "block"; // ถ้าไม่มีเลข ให้โชว์ฟอร์มว่างๆ
+      }
+
+      // ฟังการเปลี่ยนแปลงใน input ถ้ากรอกมือ
+      orderInput.addEventListener("change", (e) => {
+        if (e.target.value.trim()) {
+          fetchTaskData(e.target.value.trim());
+        }
+      });
+
+      async function fetchTaskData(orderNo) {
+        const loading = document.getElementById("fetch-loading");
+        const form = document.getElementById("updateForm");
+        const summaryContainer = document.getElementById("summary-container");
+
+        loading.style.display = "block";
+        form.style.display = "none";
+        summaryContainer.innerHTML = "";
+
+        const callbackName = "getTask_" + Date.now();
+        window[callbackName] = function (response) {
+          loading.style.display = "none";
+          delete window[callbackName];
+          document.body.removeChild(script);
+
+          if (response.result === "success" && response.data) {
+            processTaskData(response.data);
+          } else {
+            form.style.display = "block"; // ถ้าไม่เจอข้อมูล ให้โชว์ฟอร์มปกติ
+          }
+        };
+
+        const script = document.createElement("script");
+        script.src = `${SCRIPT_URL}?callback=${callbackName}&action=get_task_by_id&data=${encodeURIComponent(
+          JSON.stringify({ orderNo })
+        )}`;
+        document.body.appendChild(script);
+      }
+
+      function processTaskData(data) {
+        const form = document.getElementById("updateForm");
+        const summaryContainer = document.getElementById("summary-container");
+        const submitBtn = document.getElementById("submitBtn");
+
+        const s1 = data["ผลการวิ่งงาน 1: สถานะ"];
+        const s2 = data["ผลการวิ่งงาน 2: สถานะ"];
+        const s3 = data["ผลการวิ่งงาน 3: สถานะ"];
+
+        const isFinished = (s) => s === "สำเร็จ" || s === "ลูกค้าขอยกเลิก";
+
+        // 1. เช็คว่ามีสถานะจบงานหรือยัง
+        if (isFinished(s1) || isFinished(s2) || isFinished(s3)) {
+          const finalStatus = isFinished(s1) ? s1 : isFinished(s2) ? s2 : s3;
+          const isSuccess = finalStatus === "สำเร็จ";
+
+          summaryContainer.innerHTML = `
+            <div class="summary-card ${isSuccess ? "success" : "error"}">
+              <i data-feather="${isSuccess ? "check-circle" : "x-circle"}"></i>
+              <div class="summary-title">งานนี้ ${finalStatus} แล้ว</div>
+              <div class="summary-detail">ไม่สามารถแก้ไขข้อมูลได้อีก</div>
+            </div>
+          `;
+          feather.replace();
+          form.style.display = "none";
+          return;
+        }
+
+        // 2. ถ้ายังไม่จบงาน เช็คว่าจะโชว์ Section ไหน
+        form.style.display = "block";
+        const sections = [
+          document.getElementById("section1"),
+          document.getElementById("section2"),
+          document.getElementById("section3"),
+        ];
+
+        // ซ่อนทุกอันก่อน
+        sections.forEach((s) => (s.style.display = "none"));
+
+        if (!s1) {
+          sections[0].style.display = "block";
+        } else if (!s2) {
+          sections[1].style.display = "block";
+        } else if (!s3) {
+          sections[2].style.display = "block";
+        } else {
+          // เต็ม 3 รอบแล้วแต่ยังไม่สำเร็จ/ยกเลิก
+          summaryContainer.innerHTML = `
+            <div class="summary-card error">
+              <i data-feather="alert-triangle"></i>
+              <div class="summary-title">บันทึกครบ 3 ครั้งแล้ว</div>
+              <div class="summary-detail">สถานะล่าสุด: ${s3} (ไม่สามารถบันทึกเพิ่มได้)</div>
+            </div>
+          `;
+          feather.replace();
+          form.style.display = "none";
+          return;
+        }
       }
 
       // ✅ Highlight section เมื่อเลือก
@@ -406,13 +553,10 @@
             } else {
               // ถ้ารับค่าจาก URL ไม่ต้อง reset orderNo แต่ให้ reset ส่วนสถานะแทน
               document.getElementById("result1").value = "";
-              document.getElementById("date1").value = "";
               document.getElementById("note1").value = "";
               document.getElementById("result2").value = "";
-              document.getElementById("date2").value = "";
               document.getElementById("note2").value = "";
               document.getElementById("result3").value = "";
-              document.getElementById("date3").value = "";
               document.getElementById("note3").value = "";
             }
             resultMsg.className = "";
@@ -429,13 +573,10 @@
           const orderNo = formData.get("orderNo").trim();
           const messengerName = formData.get("messengerName").trim(); // ✅ อ่านค่าชื่อพนักงาน
           const result1 = formData.get("result1");
-          const date1 = formData.get("date1");
           const note1 = formData.get("note1").trim();
           const result2 = formData.get("result2");
-          const date2 = formData.get("date2");
           const note2 = formData.get("note2").trim();
           const result3 = formData.get("result3");
-          const date3 = formData.get("date3");
           const note3 = formData.get("note3").trim();
 
           if (!orderNo)
@@ -447,19 +588,27 @@
           submitBtn.textContent = "⏳ กำลังบันทึก...";
           showResult("loading", "⏳ กำลังบันทึกสถานะ...");
 
+          // สร้างวันที่ปัจจุบันในรูปแบบ dd/mm/yyyy
+          const now = new Date();
+          const autoDate = `${now.getDate().toString().padStart(2, "0")}/${(
+            now.getMonth() + 1
+          )
+            .toString()
+            .padStart(2, "0")}/${now.getFullYear()}`;
+
           const payload = {
             action: "update",
             orderNo,
             messengerName, // ✅ ใส่ชื่อพนักงานใน payload
             id: userData.id || "", // ✅ ใส่ id ของพนักงาน
             result1: result1 || "",
-            date1: date1 || "",
+            date1: result1 ? autoDate : "", // ส่งวันที่เฉพาะถ้ามีการเลือกสถานะ
             note1: note1 || "",
             result2: result2 || "",
-            date2: date2 || "",
+            date2: result2 ? autoDate : "",
             note2: note2 || "",
             result3: result3 || "",
-            date3: date3 || "",
+            date3: result3 ? autoDate : "",
             note3: note3 || "",
             timestamp: new Date().toLocaleString("th-TH"),
           };
