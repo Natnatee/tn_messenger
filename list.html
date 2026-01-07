@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TN Messenger Service - รายการงาน</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+      :root {
+        --primary: #1e3a8a;
+        --primary-light: #3b82f6;
+        --text: #111827;
+        --text-light: #6b7280;
+        --bg: #f3f4f6;
+        --white: #ffffff;
+        --border: #d1d5db;
+        --error: #ef4444;
+        --success: #059669;
+        --warning: #f59e0b;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Prompt", sans-serif;
+        background: var(--bg);
+        min-height: 100vh;
+        padding: 20px;
+        padding-bottom: 100px;
+        color: var(--text);
+      }
+
+      .header {
+        max-width: 600px;
+        margin: 0 auto 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      h2 {
+        color: var(--primary);
+        font-size: 24px;
+      }
+
+      .refresh-btn {
+        background: var(--white);
+        border: 1px solid var(--border);
+        padding: 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .refresh-btn:hover {
+        background: var(--primary-light);
+        color: white;
+      }
+
+      #task-container {
+        max-width: 600px;
+        margin: 0 auto;
+        display: grid;
+        gap: 15px;
+      }
+
+      .task-card {
+        background: var(--white);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border-top: 6px solid var(--primary);
+        position: relative;
+        transition: transform 0.2s;
+      }
+
+      .task-card:active {
+        transform: scale(0.98);
+      }
+
+      .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        border-bottom: 1px solid var(--bg);
+        padding-bottom: 10px;
+      }
+
+      .order-no {
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--primary);
+      }
+
+      .status-dots {
+        display: flex;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #e5e7eb;
+      }
+
+      .dot.active {
+        background: var(--success);
+      }
+
+      .dot.inactive {
+        background: var(--error);
+      }
+
+      .info-row {
+        margin-bottom: 8px;
+        font-size: 14px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .info-label {
+        color: var(--text-light);
+        min-width: 110px;
+        flex-shrink: 0;
+      }
+
+      .info-value {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      .card-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid var(--bg);
+      }
+
+      .btn {
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .btn-detail {
+        background: #f3f4f6;
+        color: var(--text);
+      }
+
+      .btn-update {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+      }
+
+      /* Modal */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 2000;
+      }
+
+      .modal-content {
+        background: white;
+        width: 100%;
+        max-width: 500px;
+        max-height: 80vh;
+        border-radius: 18px;
+        overflow-y: auto;
+        padding: 25px;
+        position: relative;
+      }
+
+      .modal-header {
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--bg);
+        padding-bottom: 10px;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+      }
+
+      .close-modal {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 10px;
+        cursor: pointer;
+        color: var(--text-light);
+      }
+
+      .detail-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .detail-item {
+        font-size: 14px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+
+      .detail-item:last-child {
+        border-bottom: none;
+      }
+
+      .detail-label {
+        color: var(--text-light);
+        display: block;
+        font-size: 12px;
+      }
+
+      .detail-value {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* Bottom Navigation */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--primary);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 12px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: "Prompt", sans-serif;
+      }
+
+      .nav-item.active {
+        color: white;
+      }
+
+      .nav-item i {
+        margin-bottom: 4px;
+        width: 20px;
+        height: 20px;
+      }
+
+      /* Loading */
+      #loading-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-light);
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spin {
+        animation: spin 1s linear infinite;
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 40px;
+        background: var(--white);
+        border-radius: 18px;
+        color: var(--text-light);
+      }
+    </style>
+
+    <script>
+      // Protect Route
+      const token = localStorage.getItem("tn_employee_token");
+      if (!token) {
+        window.location.href = "login_employee.html";
+      }
+
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbwutGjM8fg__QRCBYBiDsCJ8ttkQ-97v8gER_C_W7VB4TG5-vvX5doUXlbGc5bvZYM5/exec";
+    </script>
+  </head>
+
+  <body>
+    <div class="header">
+      <h2>รายการงาน</h2>
+      <button class="refresh-btn" onclick="fetchTasks()" title="โหลดข้อมูลใหม่">
+        <i data-feather="refresh-cw" id="refresh-icon"></i>
+      </button>
+    </div>
+
+    <div id="task-container">
+      <div id="loading-state">
+        <i data-feather="loader" class="spin"></i>
+        <p>กำลังโหลดข้อมูล...</p>
+      </div>
+    </div>
+
+    <!-- Modal รายละเอียด -->
+    <div id="detail-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">รายละเอียดงาน</h3>
+          <span class="close-modal" onclick="closeModal()"
+            ><i data-feather="x"></i
+          ></span>
+        </div>
+        <div id="modal-body" class="detail-list">
+          <!-- ข้อมูลจะถูกใส่ที่นี่ -->
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <a href="home.html" class="nav-item">
+        <i data-feather="home"></i>
+        <span>หน้าหลัก</span>
+      </a>
+      <a href="scan.html" class="nav-item">
+        <i data-feather="maximize"></i>
+        <span>สแกน</span>
+      </a>
+      <a href="list.html" class="nav-item active">
+        <i data-feather="list"></i>
+        <span>รายการ</span>
+      </a>
+      <button onclick="handleLogout()" class="nav-item" style="color: #fda4af">
+        <i data-feather="log-out"></i>
+        <span>ออกจากระบบ</span>
+      </button>
+    </nav>
+
+    <script>
+      feather.replace();
+
+      const taskContainer = document.getElementById("task-container");
+      const refreshIcon = document.getElementById("refresh-icon");
+      const detailModal = document.getElementById("detail-modal");
+      const modalBody = document.getElementById("modal-body");
+      const modalTitle = document.getElementById("modal-title");
+
+      document.addEventListener("DOMContentLoaded", fetchTasks);
+
+      function fetchTasks() {
+        const userData = JSON.parse(
+          localStorage.getItem("tn_employee_user") || "{}"
+        );
+        if (!userData.id) return;
+
+        // Start loading UI
+        taskContainer.innerHTML = `
+          <div id="loading-state">
+            <i data-feather="loader" class="spin"></i>
+            <p>กำลังโหลดข้อมูล...</p>
+          </div>
+        `;
+        refreshIcon.classList.add("spin");
+        feather.replace();
+
+        const callbackName = "cb_" + Date.now();
+        const dataPayload = JSON.stringify({ id: userData.id.toString() });
+
+        window[callbackName] = function (response) {
+          console.log("Tasks response:", response);
+          refreshIcon.classList.remove("spin");
+
+          if (response.result === "success") {
+            renderTasks(response.data);
+          } else {
+            taskContainer.innerHTML = `<div class="no-data">เกิดข้อผิดพลาด: ${
+              response.message || "ไม่สามารถดึงข้อมูลได้"
+            }</div>`;
+          }
+
+          delete window[callbackName];
+          document.body.removeChild(script);
+        };
+
+        const script = document.createElement("script");
+        script.src = `${SCRIPT_URL}?action=get_task_employee&data=${encodeURIComponent(
+          dataPayload
+        )}&callback=${callbackName}`;
+        script.onerror = () => {
+          refreshIcon.classList.remove("spin");
+          taskContainer.innerHTML = `<div class="no-data">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</div>`;
+        };
+        document.body.appendChild(script);
+      }
+
+      function renderTasks(tasks) {
+        if (!tasks || tasks.length === 0) {
+          taskContainer.innerHTML = `<div class="no-data">ไม่มีรายการงานที่ได้รับมอบหมาย</div>`;
+          return;
+        }
+
+        taskContainer.innerHTML = "";
+        tasks.forEach((task) => {
+          const card = document.createElement("div");
+          card.className = "task-card";
+
+          // เช็คสถานะวงกลม 3 อัน
+          const status1 = !!task["ผลการวิ่งงาน 1: สถานะ"];
+          const status2 = !!task["ผลการวิ่งงาน 2: สถานะ"];
+          const status3 = !!task["ผลการวิ่งงาน 3: สถานะ"];
+
+          card.innerHTML = `
+            <div class="task-header">
+              <span class="order-no">#${task["เลขที่ใบสั่งงาน"]}</span>
+              <div class="status-dots">
+                <div class="dot ${
+                  status1 ? "active" : "inactive"
+                }" title="งาน 1"></div>
+                <div class="dot ${
+                  status2 ? "active" : "inactive"
+                }" title="งาน 2"></div>
+                <div class="dot ${
+                  status3 ? "active" : "inactive"
+                }" title="งาน 3"></div>
+              </div>
+            </div>
+            
+            <div class="info-row">
+              <span class="info-label">โครงการ / ทีม :</span>
+              <span class="info-value">${task["โครงการ"]} / ${
+            task["(ทีม)"]
+          }</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ชื่อผู้สั่งงาน :</span>
+              <span class="info-value">${task["ผู้สั่งงาน"]}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">เบอร์ผู้สั่งงาน :</span>
+              <span class="info-value">${task["เบอร์โทรศัพท์"]}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ชื่อลูกค้า :</span>
+              <span class="info-value">${task["ลูกค้า"]}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">เบอร์ลูกค้า :</span>
+              <span class="info-value">${task["เบอร์โทรศัพท์ลูกค้า"]}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">สถานที่ติดต่อ :</span>
+              <span class="info-value">${task["ที่อยู่รับเอกสาร เลขที่ ถนน"]} ${
+            task["แขวง/ตำบล"]
+          } ${task["เขต/อำเภอ"]} ${task["จังหวัด/รหัสไปรษณีย์"]}</span>
+            </div>
+
+            <div class="card-actions">
+              <button class="btn btn-detail" onclick='showDetails(${JSON.stringify(
+                task
+              ).replace(/'/g, "&apos;")})'>
+                <i data-feather="eye"></i> ดูรายละเอียด
+              </button>
+              <a href="update-status.html?order=${
+                task["เลขที่ใบสั่งงาน"]
+              }" class="btn btn-update">
+                <i data-feather="edit-3"></i> อัปเดตสถานะ
+              </a>
+            </div>
+          `;
+          taskContainer.appendChild(card);
+        });
+        feather.replace();
+      }
+
+      function showDetails(task) {
+        modalTitle.innerText = `รายละเอียดงาน #${task["เลขที่ใบสั่งงาน"]}`;
+        modalBody.innerHTML = "";
+
+        // แสดงทุกฟิลด์ใน json โดยไม่กรองออก
+        for (const [key, value] of Object.entries(task)) {
+          const item = document.createElement("div");
+          item.className = "detail-item";
+          item.innerHTML = `
+            <span class="detail-label">${key}</span>
+            <span class="detail-value">${
+              value !== null && value !== undefined ? value : "-"
+            }</span>
+          `;
+          modalBody.appendChild(item);
+        }
+
+        detailModal.style.display = "flex";
+        feather.replace();
+      }
+
+      function closeModal() {
+        detailModal.style.display = "none";
+      }
+
+      // ปิด modal เมื่อคลิกพื้นหลัง
+      window.onclick = function (event) {
+        if (event.target == detailModal) {
+          closeModal();
+        }
+      };
+
+      function handleLogout() {
+        if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+          localStorage.removeItem("tn_employee_token");
+          localStorage.removeItem("tn_employee_user");
+          window.location.href = "login_employee.html";
+        }
+      }
+    </script>
+  </body>
+</html>

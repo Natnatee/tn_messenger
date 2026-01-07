@@ -1,275 +1,373 @@
 <!DOCTYPE html>
 <html lang="th">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TN Messenger Service - สแกน QR Code</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-light: #3b82f6;
-            --text: #111827;
-            --text-light: #6b7280;
-            --bg: #f3f4f6;
-            --white: #ffffff;
-            --border: #d1d5db;
-            --error: #ef4444;
-            --success: #059669;
-        }
+      :root {
+        --primary: #1e3a8a;
+        --primary-light: #3b82f6;
+        --text: #111827;
+        --text-light: #6b7280;
+        --bg: #f3f4f6;
+        --white: #ffffff;
+        --border: #d1d5db;
+        --error: #ef4444;
+        --success: #059669;
+      }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: 'Prompt', sans-serif;
-            background: var(--bg);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            padding-bottom: 100px;
-        }
+      body {
+        font-family: "Prompt", sans-serif;
+        background: var(--bg);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        padding-bottom: 100px;
+      }
 
-        .scan-container {
-            max-width: 480px;
-            width: 100%;
-            background: #fff;
-            padding: 20px;
-            border-radius: 18px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            border-top: 8px solid var(--primary);
-            text-align: center;
-            margin-top: 20px;
-        }
+      .scan-container {
+        max-width: 480px;
+        width: 100%;
+        background: #fff;
+        padding: 20px;
+        border-radius: 18px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border-top: 8px solid var(--primary);
+        text-align: center;
+        margin-top: 20px;
+      }
 
-        h2 {
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
+      h2 {
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
 
-        .scan-desc {
-            font-size: 14px;
-            color: var(--text-light);
-            margin-bottom: 20px;
-        }
+      .scan-desc {
+        font-size: 14px;
+        color: var(--text-light);
+        margin-bottom: 20px;
+      }
 
-        #reader {
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid var(--border) !important;
-        }
+      #reader {
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid var(--border) !important;
+      }
 
-        /* Customize html5-qrcode UI */
-        #reader__dashboard_section_csr button {
-            padding: 8px 16px;
-            background-color: var(--primary) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 8px !important;
-            cursor: pointer;
-            font-family: 'Prompt', sans-serif;
-            margin: 10px 0;
-        }
+      /* Customize html5-qrcode UI */
+      #reader__dashboard_section_csr button {
+        padding: 8px 16px;
+        background-color: var(--primary) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        cursor: pointer;
+        font-family: "Prompt", sans-serif;
+        margin: 10px 0;
+      }
 
-        #result-container {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 12px;
-            display: none;
-            word-break: break-all;
-        }
+      #result-container {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 12px;
+        display: none;
+        word-break: break-all;
+      }
 
-        .result-success {
-            background: #ecfdf5;
-            color: var(--success);
-            border: 1px solid #10b981;
-        }
+      .result-success {
+        background: #ecfdf5;
+        color: var(--success);
+        border: 1px solid #10b981;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px 15px;
+      }
 
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--primary);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 12px 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
+      .order-link-btn {
+        display: inline-block;
+        padding: 6px 12px;
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 14px;
+        transition: background 0.2s;
+      }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-family: 'Prompt', sans-serif;
-        }
+      .order-link-btn:hover {
+        background: var(--primary-light);
+      }
 
-        .nav-item.active {
-            color: white;
-        }
+      /* Bottom Navigation */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--primary);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 12px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
 
-        .nav-item i {
-            margin-bottom: 4px;
-            width: 20px;
-            height: 20px;
-        }
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: "Prompt", sans-serif;
+      }
 
-        /* Loading state */
-        #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
+      .nav-item.active {
+        color: white;
+      }
 
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+      .nav-item i {
+        margin-bottom: 4px;
+        width: 20px;
+        height: 20px;
+      }
+
+      /* Loading state */
+      #loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
         }
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
 
     <script>
-        // Protect Route
-        const token = localStorage.getItem("tn_employee_token");
-        if (!token) {
-            window.location.href = 'login_employee.html';
-        }
-    </script>
-</head>
+      // Protect Route
+      const token = localStorage.getItem("tn_employee_token");
+      if (!token) {
+        window.location.href = "login_employee.html";
+      }
 
-<body>
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbwutGjM8fg__QRCBYBiDsCJ8ttkQ-97v8gER_C_W7VB4TG5-vvX5doUXlbGc5bvZYM5/exec";
+    </script>
+  </head>
+
+  <body>
     <div id="loading-overlay">
-        <div style="text-align: center;">
-            <i data-feather="loader" style="width: 48px; height: 48px; color: var(--primary); animation: spin 1s linear infinite;"></i>
-        </div>
+      <div style="text-align: center">
+        <i
+          data-feather="loader"
+          style="
+            width: 48px;
+            height: 48px;
+            color: var(--primary);
+            animation: spin 1s linear infinite;
+          "
+        ></i>
+      </div>
     </div>
 
     <div class="scan-container">
-        <i data-feather="maximize" style="width: 40px; height: 40px; color: var(--primary); margin-bottom: 10px;"></i>
-        <h2>สแกน QR Code</h2>
-        <p class="scan-desc">สแกนรหัสพัสดุเพื่ออัปเดตสถานะ</p>
+      <i
+        data-feather="maximize"
+        style="
+          width: 40px;
+          height: 40px;
+          color: var(--primary);
+          margin-bottom: 10px;
+        "
+      ></i>
+      <h2>สแกน QR Code</h2>
+      <p class="scan-desc">สแกนรหัสพัสดุเพื่ออัปเดตสถานะ</p>
 
-        <div id="reader"></div>
+      <div id="reader"></div>
 
-        <div id="result-container" class="result-success">
-            <strong>สแกนสำเร็จ:</strong> <span id="scan-result"></span>
-        </div>
+      <div id="result-container" class="result-success">
+        <strong>สแกนสำเร็จ:</strong> <span id="scan-result"></span>
+      </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="home.html" class="nav-item">
-            <i data-feather="home"></i>
-            <span>หน้าหลัก</span>
-        </a>
-        <a href="scan.html" class="nav-item active">
-            <i data-feather="maximize"></i>
-            <span>สแกน</span>
-        </a>
-        <a href="list.html" class="nav-item">
-            <i data-feather="list"></i>
-            <span>รายการ</span>
-        </a>
-        <button onclick="handleLogout()" class="nav-item" style="color: #fda4af;">
-            <i data-feather="log-out"></i>
-            <span>ออกจากระบบ</span>
-        </button>
+      <a href="home.html" class="nav-item">
+        <i data-feather="home"></i>
+        <span>หน้าหลัก</span>
+      </a>
+      <a href="scan.html" class="nav-item active">
+        <i data-feather="maximize"></i>
+        <span>สแกน</span>
+      </a>
+      <a href="list.html" class="nav-item">
+        <i data-feather="list"></i>
+        <span>รายการ</span>
+      </a>
+      <button onclick="handleLogout()" class="nav-item" style="color: #fda4af">
+        <i data-feather="log-out"></i>
+        <span>ออกจากระบบ</span>
+      </button>
     </nav>
 
     <script>
-        feather.replace();
+      feather.replace();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // ซ่อน loading
+      document.addEventListener("DOMContentLoaded", () => {
+        // ซ่อน loading
+        setTimeout(() => {
+          document.getElementById("loading-overlay").style.display = "none";
+          startScanner();
+        }, 500);
+      });
+
+      let isScanning = true;
+
+      function startScanner() {
+        const html5QrCode = new Html5Qrcode("reader");
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+          // เมื่อสแกนสำเร็จ
+          if (!isScanning) return;
+
+          console.log(`Code matched = ${decodedText}`, decodedResult);
+
+          const resultContainer = document.getElementById("result-container");
+          const resultSpan = document.getElementById("scan-result");
+
+          // ตรวจสอบว่าในลิงก์มีคำว่า order หรือไม่
+          let orderId = "";
+          try {
+            const url = new URL(decodedText);
+            orderId = url.searchParams.get("order");
+          } catch (e) {
+            // ถ้าไม่ใช่ URL อาจจะเป็นข้อความปกติ ให้ลองเช็คด้วย regex
+            const match = decodedText.match(/[?&]order=([^&]+)/);
+            if (match) orderId = match[1];
+          }
+
+          if (orderId) {
+            isScanning = false; // หยุดสแกนชั่วคราว
+
+            // ✅ ดึงข้อมูลพนักงานจาก localStorage
+            const userData = JSON.parse(
+              localStorage.getItem("tn_employee_user") || "{}"
+            );
+
+            // ✅ เตรียม payload ส่ง API
+            const payload = {
+              action: "update",
+              orderNo: orderId,
+              messengerName: userData.username || "Unknown",
+              id: userData.id || "",
+              timestamp: new Date().toLocaleString("th-TH"),
+            };
+
+            // ✅ ยิง API (JSONP)
+            const callbackName = "callback_" + Date.now();
+            window[callbackName] = function (response) {
+              console.log("Auto-update success:", response);
+              delete window[callbackName];
+              document.body.removeChild(script);
+            };
+
+            const script = document.createElement("script");
+            script.src = `${SCRIPT_URL}?callback=${callbackName}&action=update&data=${encodeURIComponent(
+              JSON.stringify(payload)
+            )}`;
+            script.onerror = function () {
+              console.error("Auto-update failed");
+              delete window[callbackName];
+            };
+            document.body.appendChild(script);
+
+            resultSpan.innerHTML = `Order: <strong>${orderId}</strong>`;
+            // สร้างปุ่มลิงก์แบบ Relative
+            const updateUrl = `update-status.html?order=${orderId}`;
+            const btnHtml = `<a href="${updateUrl}" class="order-link-btn">อัปเดตงาน</a>`;
+
+            // แทรกปุ่มต่อท้าย resultSpan ถ้ายังไม่มี
+            resultContainer.innerHTML = `<strong>สแกนสำเร็จ:</strong> <span id="scan-result">Order: <strong>${orderId}</strong></span> ${btnHtml}`;
+            resultContainer.style.display = "flex";
+
+            // สั่นเบาๆ (ถ้าอุปกรณ์รองรับ)
+            if (navigator.vibrate) {
+              navigator.vibrate(100);
+            }
+
+            // หน่วงเวลา 2 วินาทีค่อยให้สแกนใหม่ได้
             setTimeout(() => {
-                document.getElementById('loading-overlay').style.display = 'none';
-                startScanner();
-            }, 500);
-        });
+              isScanning = true;
+            }, 2000);
+          }
+        };
 
-        function startScanner() {
-            const html5QrCode = new Html5Qrcode("reader");
-            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                // เมื่อสแกนสำเร็จ
-                console.log(`Code matched = ${decodedText}`, decodedResult);
-                
-                const resultContainer = document.getElementById('result-container');
-                const resultSpan = document.getElementById('scan-result');
-                
-                resultSpan.textContent = decodedText;
-                resultContainer.style.display = 'block';
-                
-                // สั่นเบาๆ (ถ้าอุปกรณ์รองรับ)
-                if (navigator.vibrate) {
-                    navigator.vibrate(100);
-                }
+        const config = {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+        };
 
-                // หยุดสแกนชั่วคราว หรือ Redirect ไปหน้าอัปเดตสถานะ
-                // ตัวอย่าง: window.location.href = `update-status.html?code=${decodedText}`;
-                
-                // หลังจากสแกนได้ 2 วินาที ค่อยอนุญาตให้สแกนต่อ (ถ้าต้องการ)
-                /*
-                html5QrCode.stop().then(() => {
-                    setTimeout(() => startScanner(), 2000);
-                });
-                */
-            };
-
-            const config = { 
-                fps: 10, 
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            };
-
-            // เริ่มเปิดกล้องหลัง
-            html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-                .catch((err) => {
-                    console.error("Unable to start scanning.", err);
-                    document.getElementById('reader').innerHTML = `
+        // เริ่มเปิดกล้องหลัง
+        html5QrCode
+          .start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+          .catch((err) => {
+            console.error("Unable to start scanning.", err);
+            document.getElementById("reader").innerHTML = `
                         <div style="padding: 20px; color: var(--error);">
                             <i data-feather="alert-circle"></i><br>
                             ไม่สามารถเข้าถึงกล้องได้<br>
                             กรุณาตรวจสอบการอนุญาตใช้งานกล้อง
                         </div>
                     `;
-                    feather.replace();
-                });
-        }
+            feather.replace();
+          });
+      }
 
-        function handleLogout() {
-            if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
-                localStorage.removeItem("tn_employee_token");
-                localStorage.removeItem("tn_employee_user");
-                window.location.href = 'login_employee.html';
-            }
+      function handleLogout() {
+        if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+          localStorage.removeItem("tn_employee_token");
+          localStorage.removeItem("tn_employee_user");
+          window.location.href = "login_employee.html";
         }
+      }
     </script>
-</body>
-
+  </body>
 </html>

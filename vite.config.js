@@ -25,6 +25,7 @@ export default defineConfig({
         scan: "scan.html",
         login_employee: "login_employee.html",
         register_employee: "register_employee.html",
+        list: "list.html",
       },
     },
   },
