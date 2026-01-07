@@ -321,7 +321,9 @@
         color: var(--text);
         border: 1px solid var(--border);
         table-layout: fixed;
-        th:nth-child(14) { width: 250px; }
+        th:nth-child(14) {
+          width: 250px;
+        }
       }
 
       thead th {
@@ -850,21 +852,13 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
 
         /************** QR CODE ****************/
         if (qrDataURL && side === "left") {
-          const qrSize = 20;
-          const qrX = x + FORM_WIDTH - qrSize - 5;
-          const qrY = startY - 8;
+          const qrSize = 30; // ✅ กลับมาขนาด 30 ตามที่ต้องการ
+          const qrX = x + FORM_WIDTH - qrSize + 5; // ✅ ขยับไปทางขวาเพิ่มขึ้น (จากเดิมไม่บวกเพิ่ม)
+          const qrY = startY - 12; // ✅ ตำแหน่ง Y เดิมที่ดูดี
 
           doc.addImage(qrDataURL, "PNG", qrX, qrY, qrSize, qrSize);
 
-          doc.setFontSize(7);
-          doc.text(
-            "สแกนเพื่ออัพเดทสถานะงาน",
-            qrX + qrSize / 2,
-            qrY + qrSize + 2,
-            {
-              align: "center",
-            }
-          );
+          // ✅ เอาคำว่า "สแกนเพื่ออัพเดทสถานะงาน" ออกตามที่ขอครับ
         }
 
         y += 10;
