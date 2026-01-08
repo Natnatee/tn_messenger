@@ -439,6 +439,7 @@
       });
 
       async function fetchTaskData(orderNo) {
+        orderNo = orderNo.toString().replace(/^0+/, ""); // ตัดเลข 0 ที่นำหน้าออก (เช่น 0391 -> 391)
         const loading = document.getElementById("fetch-loading");
         const form = document.getElementById("updateForm");
         const summaryContainer = document.getElementById("summary-container");
@@ -449,6 +450,7 @@
 
         const callbackName = "getTask_" + Date.now();
         window[callbackName] = function (response) {
+          console.log("API Response:", response);
           loading.style.display = "none";
           delete window[callbackName];
           document.body.removeChild(script);
