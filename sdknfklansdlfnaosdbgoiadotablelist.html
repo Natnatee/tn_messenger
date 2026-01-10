@@ -850,21 +850,6 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
           }
         );
 
-        /************** QR CODE ****************/
-        if (qrDataURL && side === "left") {
-          const qrSize = 30; // ✅ กลับมาขนาด 30 ตามที่ต้องการ
-          const qrX = x + FORM_WIDTH - qrSize + 5; // ✅ ขยับไปทางขวาเพิ่มขึ้น (จากเดิมไม่บวกเพิ่ม)
-          const qrY = startY - 8; // ✅ เลื่อนลงมาหน่อย (จาก -12 เป็น -8)
-
-          // ✅ เพิ่มพื้นหลังสีขาว
-          doc.setFillColor(255, 255, 255); // สีขาว
-          doc.rect(qrX, qrY, qrSize, qrSize, "F"); // วาดสี่เหลี่ยมสีขาว
-
-          doc.addImage(qrDataURL, "PNG", qrX, qrY, qrSize, qrSize);
-
-          // ✅ เอาคำว่า "สแกนเพื่ออัพเดทสถานะงาน" ออกตามที่ขอครับ
-        }
-
         y += 10;
 
         /**************** 1. ข้อมูลทั่วไป ****************/
@@ -1095,6 +1080,20 @@ AAEAAAAOAIAAAwBgR0RFRi2dLXEAAAHQAAAAkkdQT1MxkgqDAABC+AAAPxxHU1VC9N7TyQAAFMAAAAoE
         }
 
         y = ry;
+
+        /************** QR CODE (Draw last to stay on top) ****************/
+        if (qrDataURL && side === "left") {
+          const qrSize = 30;
+          const qrPadding = 2; // เพิ่มแพดดิ้งรอบๆ
+          const qrX = startX + FORM_WIDTH - qrSize + 5;
+          const qrY = startY - 8;
+
+          // เพิ่มพื้นหลังสีขาวเพื่อปิดเส้นขอบที่อยู่ด้านล่าง (ใหญ่กว่าตัว QR เล็กน้อยเพื่อเป็น padding)
+          doc.setFillColor(255, 255, 255);
+          doc.rect(qrX - qrPadding, qrY - qrPadding, qrSize + (qrPadding * 2), qrSize + (qrPadding * 2), "F");
+
+          doc.addImage(qrDataURL, "PNG", qrX, qrY, qrSize, qrSize);
+        }
 
         // เพิ่มเส้นแบ่งกลางระหว่าง 2 ชุด
         if (side === "left") {
