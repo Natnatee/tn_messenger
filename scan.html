@@ -332,7 +332,12 @@
               if (response && response.result === "success" && response.data) {
                 // ✅ บันทึกลง localStorage (tasks_employee)
                 const storedTasks = JSON.parse(localStorage.getItem("tasks_employee") || "{}");
-                storedTasks[cleanOrderId] = response.data; // เก็บข้อมูลลงใน key ที่เป็นเลขที่ใบสั่งงาน (เขียนทับถ้าซ้ำ)
+                
+                // เพิ่มฟิลด์วันที่สแกน (YYYY-MM-DD) เพื่อใช้เช็คตอนล้างข้อมูลข้ามวัน
+                const today = new Date().toISOString().split('T')[0];
+                const taskData = { ...response.data, scan_date: today };
+                
+                storedTasks[cleanOrderId] = taskData; // เก็บข้อมูลลงใน key ที่เป็นเลขที่ใบสั่งงาน (เขียนทับถ้าซ้ำ)
                 localStorage.setItem("tasks_employee", JSON.stringify(storedTasks));
               }
 

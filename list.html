@@ -107,28 +107,10 @@
         color: var(--primary);
       }
 
-      .status-dots {
-        display: flex;
-        gap: 6px;
-      }
-
-      .dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #e5e7eb; /* เทา: ว่าง */
-      }
-
-      .dot.success {
-        background: var(--success); /* เขียว: สำเร็จ */
-      }
-
-      .dot.cancel {
-        background: var(--error); /* แดง: ลูกค้าขอยกเลิก */
-      }
-
-      .dot.pending {
-        background: var(--warning); /* เหลือง: มีข้อมูลอื่นๆ */
+      .order-no {
+        font-weight: 700;
+        font-size: 18px;
+        color: var(--primary);
       }
 
       .info-row {
@@ -341,10 +323,7 @@
 
   <body>
     <div class="header">
-      <h2>รายการงาน</h2>
-      <button class="refresh-btn" onclick="fetchTasks()" title="โหลดข้อมูลใหม่">
-        <i data-feather="refresh-cw" id="refresh-icon"></i>
-      </button>
+      <h2>รายการงานสแกนวันนี้</h2>
     </div>
 
     <div id="task-container">
@@ -392,7 +371,6 @@
       feather.replace();
 
       const taskContainer = document.getElementById("task-container");
-      const refreshIcon = document.getElementById("refresh-icon");
       const detailModal = document.getElementById("detail-modal");
       const modalBody = document.getElementById("modal-body");
       const modalTitle = document.getElementById("modal-title");
@@ -400,49 +378,36 @@
       document.addEventListener("DOMContentLoaded", fetchTasks);
 
       function fetchTasks() {
-        const userData = JSON.parse(
-          localStorage.getItem("tn_employee_user") || "{}"
-        );
-        if (!userData.id) return;
-
         // Start loading UI
         taskContainer.innerHTML = `
           <div id="loading-state">
             <i data-feather="loader" class="spin"></i>
-            <p>กำลังโหลดข้อมูล...</p>
+            <p>กำลังโหลดข้อมูลจากเครื่อง...</p>
           </div>
         `;
-        refreshIcon.classList.add("spin");
         feather.replace();
 
-        const callbackName = "cb_" + Date.now();
-        const dataPayload = JSON.stringify({ id: userData.id.toString() });
+        // 1. ดึงข้อมูลจาก localStorage
+        const storedTasks = JSON.parse(localStorage.getItem("tasks_employee") || "{}");
+        const today = new Date().toISOString().split('T')[0];
+        let hasChanges = false;
 
-        window[callbackName] = function (response) {
-          console.log("Tasks response:", response);
-          refreshIcon.classList.remove("spin");
-
-          if (response.result === "success") {
-            renderTasks(response.data);
-          } else {
-            taskContainer.innerHTML = `<div class="no-data">เกิดข้อผิดพลาด: ${
-              response.message || "ไม่สามารถดึงข้อมูลได้"
-            }</div>`;
+        // 2. Auto-Cleanup: ลบงานที่ไม่ได้สแกนวันนี้ออก
+        for (const orderId in storedTasks) {
+          if (storedTasks[orderId].scan_date !== today) {
+            delete storedTasks[orderId];
+            hasChanges = true;
           }
+        }
 
-          delete window[callbackName];
-          document.body.removeChild(script);
-        };
+        // เซฟกลับถ้ามีการลบออก
+        if (hasChanges) {
+          localStorage.setItem("tasks_employee", JSON.stringify(storedTasks));
+        }
 
-        const script = document.createElement("script");
-        script.src = `${SCRIPT_URL}?action=get_task_employee&data=${encodeURIComponent(
-          dataPayload
-        )}&callback=${callbackName}`;
-        script.onerror = () => {
-          refreshIcon.classList.remove("spin");
-          taskContainer.innerHTML = `<div class="no-data">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</div>`;
-        };
-        document.body.appendChild(script);
+        // 3. แปลงเป็น Array และแสดงผล
+        const taskList = Object.values(storedTasks);
+        renderTasks(taskList);
       }
 
       function renderTasks(tasks) {
@@ -456,32 +421,9 @@
           const card = document.createElement("div");
           card.className = "task-card";
 
-          // ฟังก์ชันช่วยกำหนดคลาสสีของจุด
-          const getDotClass = (status) => {
-            if (!status) return ""; // สีเทา (ค่าเริ่มต้น)
-            if (status === "สำเร็จ") return "success"; // สีเขียว
-            if (status === "ลูกค้าขอยกเลิก") return "cancel"; // สีแดง
-            return "pending"; // สีเหลือง (มีข้อมูลอื่นๆ)
-          };
-
-          const dot1 = getDotClass(task["ผลการวิ่งงาน 1: สถานะ"]);
-          const dot2 = getDotClass(task["ผลการวิ่งงาน 2: สถานะ"]);
-          const dot3 = getDotClass(task["ผลการวิ่งงาน 3: สถานะ"]);
-
           card.innerHTML = `
             <div class="task-header">
               <span class="order-no">#${task["เลขที่ใบสั่งงาน"]}</span>
-              <div class="status-dots">
-                <div class="dot ${dot1}" title="งาน 1: ${
-            task["ผลการวิ่งงาน 1: สถานะ"] || "ว่าง"
-          }"></div>
-                <div class="dot ${dot2}" title="งาน 2: ${
-            task["ผลการวิ่งงาน 2: สถานะ"] || "ว่าง"
-          }"></div>
-                <div class="dot ${dot3}" title="งาน 3: ${
-            task["ผลการวิ่งงาน 3: สถานะ"] || "ว่าง"
-          }"></div>
-              </div>
             </div>
             
             <div class="info-row">
