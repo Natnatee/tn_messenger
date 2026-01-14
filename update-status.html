@@ -295,6 +295,13 @@
         margin-top: 0;
       }
     </style>
+    <script>
+      // Protect Route
+      const token = localStorage.getItem("tn_employee_token");
+      if (!token) {
+        window.location.href = "login_employee.html";
+      }
+    </script>
   </head>
 
   <body>
