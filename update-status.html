@@ -336,6 +336,17 @@
             required
           />
         </div>
+
+        <div class="input-group" style="margin-top: 15px;">
+          <label for="customerName">👥 ชื่อลูกค้า</label>
+          <input
+            type="text"
+            id="customerName"
+            placeholder="ชื่อลูกค้า"
+            readonly
+            style="background: #f9fafb;"
+          />
+        </div>
         <br />
 
         <div class="result-section" id="section1">
@@ -516,6 +527,12 @@
         const form = document.getElementById("updateForm");
         const summaryContainer = document.getElementById("summary-container");
         const submitBtn = document.getElementById("submitBtn");
+        const customerNameInput = document.getElementById("customerName");
+
+        // แสดงชื่อลูกค้า (ห้ามแก้)
+        if (customerNameInput) {
+          customerNameInput.value = data["ลูกค้า"] || "";
+        }
 
         const s1 = data["ผลการวิ่งงาน 1: สถานะ"];
         const s2 = data["ผลการวิ่งงาน 2: สถานะ"];
@@ -642,7 +659,7 @@
             .padStart(2, "0")}/${now.getFullYear()}`;
 
           // ฟังก์ชันตรวจสอบว่าเป็นสถานะขอเลื่อนหรือไม่
-          const isPostpone = (val) => val === "ลูกค้าขอเลื่อน" || val === "พนักงานขอเลื่อน";
+          const isPostpone = (val) => val === "ลูกค้าขอเลื่อน" || val === "พนักงานขอเลื่อน" || val === "ลูกค้าไม่รับสาย";
 
           const payload = {
             action: "update",
@@ -668,7 +685,39 @@
               submitBtn.textContent = "💾 บันทึกสถานะ";
 
               if (response && response.result === "success") {
-                showResult("success", "✅ อัปเดตสถานะสำเร็จ!");
+                // ✅ อัปเดต Cache ใน Local Storage
+                const storedTasks = JSON.parse(localStorage.getItem("tasks_employee") || "{}");
+                const cleanOrderNo = orderNo.toString().replace(/^0+/, "");
+                
+                if (storedTasks[cleanOrderNo]) {
+                  const task = storedTasks[cleanOrderNo];
+                  
+                  // อัปเดตฟิลด์สถานะตามที่มีการส่งไป
+                  if (payload.result1) {
+                    task["ผลการวิ่งงาน 1: สถานะ"] = payload.result1;
+                    task["ผลการวิ่งงาน 1: วัน/เดือน/ปี"] = payload.date1;
+                    task["ผลการวิ่งงาน 1: หมายเหตุ"] = payload.note1;
+                  }
+                  if (payload.result2) {
+                    task["ผลการวิ่งงาน 2: สถานะ"] = payload.result2;
+                    task["ผลการวิ่งงาน 2: วัน/เดือน/ปี"] = payload.date2;
+                    task["ผลการวิ่งงาน 2: หมายเหตุ"] = payload.note2;
+                  }
+                  if (payload.result3) {
+                    task["ผลการวิ่งงาน 3: สถานะ"] = payload.result3;
+                    task["ผลการวิ่งงาน 3: วัน/เดือน/ปี"] = payload.date3;
+                    task["ผลการวิ่งงาน 3: หมายเหตุ"] = payload.note3;
+                  }
+                  
+                  // อัปเดตข้อมูลพนักงาน
+                  task["ชื่อพนักงาน"] = messengerName;
+                  task["รหัสพนักงาน"] = userData.id || "";
+                  
+                  localStorage.setItem("tasks_employee", JSON.stringify(storedTasks));
+                  console.log("Local cache updated for order:", cleanOrderNo);
+                }
+
+                showResult("success", "✅ อัปเดตสถานะสำเร็จ และบันทึกข้อมูลในเครื่องแล้ว!");
               } else {
                 showResult(
                   "error",
@@ -711,7 +760,7 @@
         const container = document.getElementById(`date-postpone-container-${index}`);
         const dateInput = document.getElementById(`rescheduledDate${index}`);
 
-        if (select.value === "ลูกค้าขอเลื่อน" || select.value === "พนักงานขอเลื่อน") {
+        if (select.value === "ลูกค้าขอเลื่อน" || select.value === "พนักงานขอเลื่อน" || select.value === "ลูกค้าไม่รับสาย") {
           container.style.display = "block";
           if (!dateInput._flatpickr) {
             flatpickr(dateInput, {

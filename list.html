@@ -105,12 +105,35 @@
         font-weight: 700;
         font-size: 18px;
         color: var(--primary);
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
       }
 
-      .order-no {
-        font-weight: 700;
-        font-size: 18px;
-        color: var(--primary);
+      .status-badge {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-weight: 500;
+        background: #e5e7eb;
+        color: #4b5563;
+        border: 1px solid rgba(0,0,0,0.05);
+      }
+
+      .status-success {
+        background: #d1fae5;
+        color: #059669;
+      }
+
+      .status-warning {
+        background: #fef3c7;
+        color: #d97706;
+      }
+
+      .status-error {
+        background: #fee2e2;
+        color: #dc2626;
       }
 
       .info-row {
@@ -421,9 +444,22 @@
           const card = document.createElement("div");
           card.className = "task-card";
 
+          const latestStatus = task["ผลการวิ่งงาน 3: สถานะ"] || 
+                               task["ผลการวิ่งงาน 2: สถานะ"] || 
+                               task["ผลการวิ่งงาน 1: สถานะ"] || 
+                               "รอดำเนินการ";
+          
+          let statusClass = "status-badge";
+          if (latestStatus === "สำเร็จ") statusClass += " status-success";
+          else if (["ลูกค้าขอเลื่อน", "พนักงานขอเลื่อน", "ลูกค้าไม่รับสาย"].includes(latestStatus)) statusClass += " status-warning";
+          else if (["ลูกค้าขอยกเลิก", "ใบหน้างานซ้ำ"].includes(latestStatus)) statusClass += " status-error";
+
           card.innerHTML = `
             <div class="task-header">
-              <span class="order-no">#${task["เลขที่ใบสั่งงาน"]}</span>
+              <span class="order-no">
+                #${task["เลขที่ใบสั่งงาน"]}
+                <span class="${statusClass}">${latestStatus}</span>
+              </span>
             </div>
             
             <div class="info-row">
